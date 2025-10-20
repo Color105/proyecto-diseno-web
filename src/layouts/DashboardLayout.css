@@ -1,0 +1,9 @@
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh;background:#121212;color:#e5e7eb}
+.sidebar{background:#0f0f0f;border-right:1px solid #2a2a2a;padding:18px 14px;position:sticky;top:0;height:100vh}
+.brand{font-size:1.2rem;margin:6px 8px 16px;color:#fff}
+.nav{display:flex;flex-direction:column;gap:6px}
+.nav a{padding:10px 12px;border-radius:10px;text-decoration:none;color:#cfcfcf;border:1px solid transparent}
+.nav a.active{background:#1f2937;border-color:#334155;color:#fff}
+.nav a:hover{background:#181818;border-color:#2a2a2a}
+.nav-section{margin:12px 8px 6px;font-size:.78rem;color:#8b8b8b;text-transform:uppercase;letter-spacing:.06em}
+.content{padding:24px}

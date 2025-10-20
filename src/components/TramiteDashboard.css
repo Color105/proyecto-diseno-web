@@ -1,0 +1,204 @@
+/* Reemplaza completamente el contenido de este archivo con el diseño estético. */
+
+/* Base y Contenedor Principal */
+body {
+    background-color: #121212; 
+    color: #f0f0f0; 
+    font-family: 'Inter', 'Arial', sans-serif; 
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-container {
+    /* 1. Ya no necesitas max-width ni margin, el content de DashBoard lo maneja */
+    padding: 40px; 
+    background-color: #1e1e1e; 
+    border-radius: 16px; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); 
+    border: 1px solid #333333; 
+    /* ... el resto de tus estilos ... */
+}
+/* Título */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #333; 
+}
+
+.dashboard-header h1 {
+    font-size: 2.8em; 
+    font-weight: 700; 
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+/* Tabla */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px; 
+}
+
+.tramites-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.1em; 
+}
+
+.tramites-table th {
+    background-color: #272727; 
+    color: #999999; 
+    font-weight: 500;
+    padding: 16px 20px;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    border-bottom: 2px solid #3a3a3a; 
+}
+
+.tramites-table td {
+    padding: 15px 20px; 
+    border-bottom: 1px solid #2a2a2a; 
+    color: #f0f0f0;
+}
+
+.tramites-table tbody tr:hover {
+    background-color: #252525; 
+    box-shadow: inset 3px 0 0 0 #007bff; 
+}
+
+/* Colores de Estado (Tags Estéticos) */
+.status-ingresado, .status-asignado, .status-en_proceso, .status-terminado, .status-cancelado, .status-suspendido {
+    padding: 4px 10px;
+    border-radius: 20px; /* Estilo Cápsula */
+    font-size: 0.85em;
+    font-weight: 700; 
+    text-transform: uppercase;
+    display: inline-block; /* Asegura el padding */
+}
+
+/* Paleta Vívida */
+.status-ingresado { background-color: #3f51b5; color: #ffffff; } 
+.status-asignado { background-color: #ff9800; color: #333333; } 
+.status-en_proceso { background-color: #4caf50; color: #ffffff; } 
+.status-terminado { background-color: #607d8b; color: #ffffff; } 
+.status-cancelado { background-color: #f44336; color: #ffffff; } 
+.status-suspendido { background-color: #9c27b0; color: #ffffff; } 
+
+
+/* Botones (Unificación Estética) */
+.btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px; 
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+    font-size: 1em; 
+}
+
+.btn-primary {
+    background-color: #007bff; 
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4); 
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px); 
+}
+
+.btn-secondary {
+    background-color: #444444; 
+    color: #f0f0f0;
+    margin-left: 15px;
+}
+
+.btn-secondary:hover {
+    background-color: #555555;
+}
+
+
+/* MODAL Y FORMULARIO (Centrado y Contraste) */
+.modal-backdrop {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Fondo más oscuro para enfoque */
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    z-index: 1000; 
+}
+
+.modal-content {
+    background-color: #272727; 
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95);
+    min-width: 450px;
+    max-width: 700px;
+}
+
+.tramite-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0; 
+}
+
+.tramite-form h3 {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.tramite-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 1.05em;
+    color: #cccccc; 
+}
+
+.tramite-form input[type="text"], 
+.tramite-form input[type="number"], 
+.tramite-form select {
+    padding: 10px;
+    font-size: 1em; 
+    border: 1px solid #444;
+    background-color: #3a3a3a; 
+    color: #ffffff;
+    border-radius: 6px;
+    margin-top: 5px; 
+}
+
+.form-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center; 
+    gap: 20px;
+}
+/* 1. Ajuste del Body para asegurar que no tiene márgenes por defecto */
+body {
+    background-color: #121212; 
+    color: #f0f0f0; 
+    font-family: 'Inter', 'Arial', sans-serif; 
+    margin: 0; /* 💡 CRÍTICO: Elimina el margen por defecto del navegador */
+    padding: 0; /* 💡 CRÍTICO: Elimina el padding por defecto */
+    min-height: 100vh; /* Asegura que el body ocupa toda la altura de la pantalla */
+}
+
+/* 2. Regla para el Contenedor del Dashboard */
+.dashboard-container {
+    max-width: 1400px; /* 💡 CRÍTICO: Debe tener un ancho máximo definido */
+    /* 💡 SOLUCIÓN: Centra el bloque horizontalmente, manteniendo 40px de margen vertical */
+    margin: 40px auto; 
+    padding: 40px; 
+    background-color: #1e1e1e; 
+    border-radius: 16px; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); 
+    border: 1px solid #333333; 
+}
