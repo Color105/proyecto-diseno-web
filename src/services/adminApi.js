@@ -19,8 +19,14 @@ export const deleteConsultor   = (id) => fetch(`${API}/consultors/${id}.json`, {
 // Tipos de trámite
 export const listTipos         = () => fetch(`${API}/tipo_tramites.json`).then(handle);
 export const createTipo        = (p) => fetch(`${API}/tipo_tramites.json`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tipo_tramite: p }) }).then(handle);
-export const updateTipo        = (id, p) => fetch(`${API}/tipo_tramites/${id}.json`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tipo_tramite: p }) }).then(handle);
-export const deleteTipo        = (id) => fetch(`${API}/tipo_tramites/${id}.json`, { method:'DELETE' }).then(handle);
+export const updateTipo        = async (id, p) => {
+  console.log(`Enviando solicitud PUT para tipo_tramite con ID: ${id} y datos:`, p);
+  return fetch(`${API}/tipo_tramites/${id}.json`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipo_tramite: p }) }).then(handle);
+};
+export const deleteTipo        = async (id) => {
+  console.log(`Enviando solicitud DELETE para tipo_tramite con ID: ${id}`);
+  return fetch(`${API}/tipo_tramites/${id}.json`, { method: 'DELETE' }).then(handle);
+};
 
 // Historial de estados (por trámite)
 export const historialPorTramite = (tramiteId) => fetch(`${API}/tramites/${tramiteId}/historico_estados.json`).then(handle);
