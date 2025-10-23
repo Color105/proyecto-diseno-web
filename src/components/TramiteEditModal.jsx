@@ -1,15 +1,18 @@
-// src/components/TramiteEditModal.jsx
 import React, { useState } from 'react';
+// ¡No importamos 'TramiteDashboard.css' aquí, ya está cargado en el Dashboard!
 
-const API_BASE = 'http://localhost:3000';
+// const API_BASE = 'http://localhost:3000'; // <-- 1. Eliminado
 
 const ALL_POSSIBLE_STATES = [
     'ingresado', 'asignado', 'en_proceso', 'suspendido', 'terminado', 'cancelado'
 ];
 
-function TramiteEditModal({ tramite, onClose, onTramiteUpdated }) {
-    const [newMonto, setNewMonto] = useState(tramite.monto.toString());
-    const [newState, setNewState] = useState(tramite.estado);
+// --- 2. ACEPTAMOS 'token' Y 'apiUrl' COMO PROPS ---
+function TramiteEditModal({ tramite, onClose, onTramiteUpdated, token, apiUrl }) {
+    
+    // El 'toString()' es importante por si el monto es 0 o null
+    const [newMonto, setNewMonto] = useState((tramite.monto || 0).toString());
+    const [newState, setNewState] = useState(tramite.estado_tramite?.nombre || 'ingresado');
     
     const [error, setError] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -17,10 +20,10 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated }) {
     const handleUpdate = (e) => { 
         e.preventDefault();
         
-        const currentMonto = parseFloat(tramite.monto);
+        const currentMonto = parseFloat(tramite.monto || 0);
         const submittedMonto = parseFloat(newMonto);
 
-        if (newState === tramite.estado && submittedMonto === currentMonto) {
+        if (newState === (tramite.estado_tramite?.nombre) && submittedMonto === currentMonto) {
             setError("No hay cambios para guardar.");
             return;
         }
@@ -33,10 +36,12 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated }) {
             new_state: newState 
         };
 
-        fetch(`${API_BASE}/tramites/${tramite.id}/update_estado`, {
+        // --- 3. USAMOS 'apiUrl' Y 'token' ---
+        fetch(`${apiUrl}/tramites/${tramite.id}/update_estado`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // ¡Autenticación!
             },
             body: JSON.stringify(payload),
         })
@@ -44,15 +49,18 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated }) {
             setIsUpdating(false);
             if (!response.ok) {
                 return response.json().then(data => {
+                    // El error 401 es 'No autorizado'
+                    if (response.status === 401) throw new Error('Error de autenticación. Intenta iniciar sesión de nuevo.');
                     throw new Error(data.error || data.details || 'Transición de estado inválida.');
                 });
             }
             return response.json();
         })
         .then(data => {
-            alert(`Actualización exitosa: ${data.message || 'Datos guardados.'}`);
+            // alert(`Actualización exitosa: ${data.message || 'Datos guardados.'}`); // <-- 4. Eliminamos alert()
+            console.log("Trámite actualizado:", data);
             
-            // Pasa el objeto completo (trámite actualizado + mensaje) al Dashboard
+            // Asumimos que 'data' es el trámite actualizado
             onTramiteUpdated(data); 
             
             onClose();
@@ -65,22 +73,22 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated }) {
     };
 
     return (
-        <div className="modal-backdrop"> 
-            <div className="modal-content">
-                <h3>Actualizar Trámite: {tramite.codigo}</h3>
+        // Todos los 'className' ya coinciden con tu CSS
+        <div className="modal-backdrop" onClick={onClose}> 
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <h3>Actualizar Trámite: {tramite.codigo || `TR-${tramite.id}`}</h3>
                 
-                <div className="details">
+                <div style={{color: '#cbd5e1', marginBottom: '1rem'}}>
                     <p><strong>Tipo:</strong> {tramite.tipo_tramite?.nombre || 'N/A'}</p>
-                    <p><strong>Consultor:</strong> {tramite.consultor?.nombre || 'Sin asignar'}</p>
+                    <p><strong>Consultor:</strong> {tramite.consultor?.email || 'Sin asignar'}</p>
                 </div>
                 
                 <div className="state-transition-section">
-                    <h4>Estado Actual: <span className={`status-${tramite.estado}`}>{tramite.estado}</span></h4>
+                    <h4>Estado Actual: <span className={`status-${tramite.estado_tramite?.nombre || 'desconocido'}`}>{tramite.estado_tramite?.nombre || 'N/A'}</span></h4>
                     
                     <form onSubmit={handleUpdate} className="tramite-form">
-                        {error && <div className="form-error">{error}</div>}
+                        {error && <div className="error-message">{error}</div>}
 
-                        {/* Campo editable para Monto */}
                         <label>
                             Monto del Servicio ($):
                             <input 
@@ -93,7 +101,6 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated }) {
                             />
                         </label>
                         
-                        {/* Selector de Estado */}
                         <label>
                             Nuevo Estado:
                             <select

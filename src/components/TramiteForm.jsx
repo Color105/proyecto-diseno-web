@@ -1,116 +1,114 @@
 import React, { useState, useEffect } from 'react';
+// ¡No usamos API_BASE hardcodeado!
+// const API_BASE = 'http://localhost:3000';
 
-const API_BASE = 'http://localhost:3000';
-
-function TramiteForm({ open = true, onClose, onTramiteCreated }) {
+// 1. Aceptamos 'token' y 'apiUrl' como props
+function TramiteForm({ token, apiUrl, onClose, onTramiteCreated }) {
   const [monto, setMonto] = useState('');
   const [consultorId, setConsultorId] = useState('');
   const [tipoTramiteId, setTipoTramiteId] = useState('');
+  
   const [consultores, setConsultores] = useState([]);
   const [tiposTramite, setTiposTramite] = useState([]);
+  
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  if (!open) return null;
-
+  // 2. useEffect para cargar los combos (selects)
   useEffect(() => {
-    let mounted = true;
-    (async () => {
+    // No hacer nada si no tenemos el token
+    if (!token) {
+      setError("Error: No hay token de autenticación.");
+      return;
+    }
+
+    const fetchCombos = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      // 3. Preparamos los headers de autenticación
+      const authHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      };
+
       try {
-        const [r1, r2] = await Promise.all([
-          fetch(`${API_BASE}/consultors.json`, { headers: { Accept: 'application/json' } }),
-          fetch(`${API_BASE}/tipo_tramites.json`, { headers: { Accept: 'application/json' } }),
+        // Usamos Promise.all para cargar ambos al mismo tiempo
+        const [resConsultores, resTipos] = await Promise.all([
+          fetch(`${apiUrl}/consultors`, { headers: authHeaders }), // <-- CORREGIDO: /consultores -> /consultors
+          fetch(`${apiUrl}/tipo_tramites`, { headers: authHeaders })  // <-- CORREGIDO: /tipos_tramite -> /tipo_tramites
         ]);
-        if (!r1.ok || !r2.ok) throw new Error('Error al cargar combos');
-        const [c, t] = await Promise.all([r1.json(), r2.json()]);
-        if (!mounted) return;
-        setConsultores(Array.isArray(c) ? c : []);
-        setTiposTramite(Array.isArray(t) ? t : []);
+
+        if (!resConsultores.ok || !resTipos.ok) {
+          throw new Error('Error al cargar combos de selección');
+        }
+
+        const dataConsultores = await resConsultores.json();
+        const dataTipos = await resTipos.json();
+
+        setConsultores(Array.isArray(dataConsultores) ? dataConsultores : []);
+        setTiposTramite(Array.isArray(dataTipos) ? dataTipos : []);
+
       } catch (err) {
         console.error(err);
-        setError('No pude cargar consultores/tipos. ¿Rails ok? ¿CORS para http://localhost:5173?');
+        setError(err.message || 'No pude cargar consultores/tipos.');
+      } finally {
+        setIsLoading(false);
       }
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    const onEsc = (e) => e.key === 'Escape' && onClose?.();
-    window.addEventListener('keydown', onEsc);
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', onEsc);
     };
-  }, [onClose]);
 
-  const parseSafeInt = (v) => {
-    const n = parseInt(v, 10);
-    return Number.isNaN(n) ? null : n;
-  };
-  const parseSafeFloat = (v) => {
-    const n = parseFloat(v);
-    return Number.isNaN(n) ? null : n;
-  };
+    fetchCombos();
+    // Dependemos de 'token' y 'apiUrl'
+  }, [token, apiUrl]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const montoNum = parseSafeFloat(monto);
-    const consultorNum = parseSafeInt(consultorId);
-    const tipoNum = parseSafeInt(tipoTramiteId);
-
-    const errs = [];
-    if (montoNum === null || montoNum < 0) errs.push('Monto inválido');
-    if (consultorNum === null) errs.push('Consultor requerido');
-    if (tipoNum === null) errs.push('Tipo de trámite requerido');
-    if (errs.length) { setError(errs.join(' · ')); return; }
-
     setIsLoading(true);
     setError(null);
 
-    // No enviamos ni estado ni código: Rails los setea.
     const payload = {
-      monto: montoNum,
-      consultor_id: consultorNum,
-      tipo_tramite_id: tipoNum,
+      monto: parseFloat(monto),
+      consultor_id: parseInt(consultorId, 10),
+      tipo_tramite_id: parseInt(tipoTramiteId, 10),
     };
 
     try {
-      const response = await fetch(`${API_BASE}/tramites`, {
+      // 4. Usamos 'token' y 'apiUrl' también para CREAR
+      const response = await fetch(`${apiUrl}/tramites`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ tramite: payload }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // ¡Autenticación!
+        },
+        body: JSON.stringify({ tramite: payload }), // Rails espera { tramite: { ... } }
       });
 
-      const readJsonSafely = async () => { try { return await response.json(); } catch { return null; } };
-
       if (!response.ok) {
-        const data = await readJsonSafely();
-        const msg = data?.errors?.join(', ') || data?.error || `Error ${response.status}`;
-        throw new Error(msg);
+        const errData = await response.json();
+        throw new Error(errData.error || errData.errors.join(', ') || 'Error al crear.');
       }
 
-      const newTramite = await readJsonSafely(); // debería venir con codigo autogenerado y estado "INGRESADO"
-      onTramiteCreated?.(newTramite);
-      onClose?.();
+      const newTramite = await response.json();
+      onTramiteCreated?.(newTramite); // Informamos al dashboard
+      onClose(); // Cerramos el modal
+
     } catch (err) {
-      console.error('POST /tramites', err);
-      setError(err.message || 'No se pudo crear el trámite.');
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const stopMouseDown = (e) => e.stopPropagation();
-
+  // Renderizado (usa las clases de tu CSS)
   return (
-    <div className="modal-backdrop" onMouseDown={onClose} role="presentation">
-      <div className="modal-content" onMouseDown={stopMouseDown} role="dialog" aria-modal="true">
+    <div className="modal-backdrop" onMouseDown={onClose}>
+      <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
         <h3>Crear Nuevo Trámite</h3>
 
         <form onSubmit={handleSubmit} className="tramite-form">
-          {error && <div className="form-error">{error}</div>}
+          
+          {error && <div className="error-message">{error}</div>}
 
           <label>
             Consultor Responsable:
@@ -121,8 +119,8 @@ function TramiteForm({ open = true, onClose, onTramiteCreated }) {
               required
             >
               <option value="">Seleccione un consultor</option>
-              {(consultores ?? []).map(c => (
-                <option key={c.id} value={c.id}>{c.nombre}</option>
+              {consultores.map(c => (
+                <option key={c.id} value={c.id}>{c.nombre} ({c.email})</option>
               ))}
             </select>
           </label>
@@ -136,7 +134,7 @@ function TramiteForm({ open = true, onClose, onTramiteCreated }) {
               required
             >
               <option value="">Seleccione un tipo</option>
-              {(tiposTramite ?? []).map(t => (
+              {tiposTramite.map(t => (
                 <option key={t.id} value={t.id}>{t.nombre}</option>
               ))}
             </select>
@@ -152,6 +150,7 @@ function TramiteForm({ open = true, onClose, onTramiteCreated }) {
               step="0.01"
               disabled={isLoading}
               required
+              placeholder='0.00'
             />
           </label>
 
@@ -170,3 +169,4 @@ function TramiteForm({ open = true, onClose, onTramiteCreated }) {
 }
 
 export default TramiteForm;
+

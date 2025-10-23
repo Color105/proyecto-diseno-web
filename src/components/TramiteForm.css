@@ -1,12 +1,13 @@
 #root {
     /* Asegura que el contenedor raíz de React ocupe toda la pantalla */
-    width: 100vw; 
+    /* width: 100vw;  <-- Comentado: Esto puede ser problemático con el scroll */
     min-height: 100vh; 
     
     /* Forzamos el centrado del contenido (el dashboard) */
-    display: flex;
-    justify-content: center; /* Centrado Horizontal */
-    align-items: center;    /* Centrado Vertical */
+    /* display: flex; <-- Comentado: Esto puede centrar en exceso y romper el layout */
+    /* justify-content: center; */
+    /* align-items: center; */
+    
     /* El dashboard-container ahora se centrará dentro de #root */
 }
 
@@ -21,8 +22,8 @@ body {
 
 .dashboard-container {
     max-width: 1400px; 
-    /* Quitamos el 'auto' del margen horizontal; Flexbox lo maneja */
-    margin: 40px 0; 
+    /* Volvemos al margen auto para un centrado estándar */
+    margin: 40px auto; 
     padding: 40px; 
     background-color: #1e1e1e; 
     border-radius: 16px; 
@@ -76,13 +77,17 @@ body {
     color: #f0f0f0;
 }
 
+.tramites-table tbody tr:last-child td {
+    border-bottom: none; /* Limpieza: la última fila no necesita borde */
+}
+
 .tramites-table tbody tr:hover {
     background-color: #252525; 
-    box-shadow: inset 3px 0 0 0 #007bff; 
+    /* box-shadow: inset 3px 0 0 0 #007bff; <-- Desactivado, puede ser molesto */
 }
 
 /* Colores de Estado (Tags Estéticos) */
-.status-ingresado, .status-asignado, .status-en_proceso, .status-terminado, .status-cancelado, .status-suspendido {
+.status-ingresado, .status-asignado, .status-en_proceso, .status-terminado, .status-cancelado, .status-suspendido, .status-desconocido {
     padding: 4px 10px;
     border-radius: 20px; 
     font-size: 0.85em;
@@ -98,6 +103,7 @@ body {
 .status-terminado { background-color: #607d8b; color: #ffffff; } 
 .status-cancelado { background-color: #f44336; color: #ffffff; } 
 .status-suspendido { background-color: #9c27b0; color: #ffffff; } 
+.status-desconocido { background-color: #607d8b; color: #ffffff; } /* <-- AÑADIDO */
 
 
 /* Botones (Unificación Estética) */
@@ -154,6 +160,7 @@ body {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95);
     min-width: 450px;
     max-width: 700px;
+    width: 90%; /* Asegura que sea responsive en móviles */
 }
 
 .tramite-form {
@@ -166,6 +173,9 @@ body {
 .tramite-form h3 {
     color: #ffffff;
     font-weight: 500;
+    text-align: center;
+    font-size: 1.5em;
+    margin: 0 0 20px 0; /* Añadido margen */
 }
 
 .tramite-form label {
@@ -193,3 +203,16 @@ body {
     justify-content: center; 
     gap: 20px;
 }
+
+/* --- CLASE DE ERROR (AÑADIDA) --- */
+/* Para errores en formularios */
+.error-message {
+    background-color: #f44336;
+    color: #ffffff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
