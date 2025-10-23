@@ -1,113 +1,93 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+// Importa la función de tu API que creamos anteriormente
 import { historialPorTramite } from '../services/adminApi';
-import './HistorialEstados.css';
+import './HistorialEstados.css'; // Crearemos este CSS para la tabla
 
 export default function HistorialEstados() {
-  const [historial, setHistorial] = useState([]);
   const [tramiteId, setTramiteId] = useState('');
+  const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Para saber qué ID se buscó
+  const [searchedId, setSearchedId] = useState(null); 
 
-  // Verificar la configuración de la API
-  useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    console.log('API URL:', apiUrl);
-  }, []);
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!tramiteId) return;
 
-  const cargarHistorial = async (id) => {
-    if (!id) return;
-    
     setLoading(true);
     setError(null);
+    setHistorial([]);
+    setSearchedId(tramiteId); // Guarda el ID que estamos buscando
+
     try {
-      console.log('Cargando historial para trámite:', id);
-      const data = await historialPorTramite(id);
-      console.log('Respuesta del servidor:', data);
-      setHistorial(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error al cargar historial:', error);
-      setError('Error al cargar el historial: ' + (error.message || 'No se pudo conectar con el servidor'));
-      setHistorial([]);
+      // Llama a la API (GET /tramites/:tramiteId/historico_estados.json)
+      const data = await historialPorTramite(tramiteId);
+      setHistorial(data || []);
+      if (!data || data.length === 0) {
+        setError('No se encontró historial para el trámite con ID o Código: ' + tramiteId);
+      }
+    } catch (err) {
+      setError(err.message || 'Error al buscar el historial. Verifique el ID.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    cargarHistorial(tramiteId);
-  };
-
-  const formatearFecha = (fecha) => {
-    return new Date(fecha).toLocaleString('es-AR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Historial de Estados</h1>
-      </div>
-
-      <div className="search-container">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>ID del Trámite:</label>
-            <div className="search-input-group">
-              <input
-                type="text"
-                value={tramiteId}
-                onChange={(e) => setTramiteId(e.target.value)}
-                placeholder="Ingrese el ID del trámite"
-                required
-              />
-              <button type="submit" className="btn-primary">
-                Buscar
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      {loading && <div className="loading">Cargando historial...</div>}
+      <h1>Historial de Estados</h1>
       
-      {error && <div className="error-message">{error}</div>}
+      {/* Formulario de Búsqueda */}
+      <form onSubmit={handleSearch} className="search-form">
+        <label htmlFor="tramiteIdInput">ID del Trámite:</label>
+        <div className="search-bar">
+          <input
+            id="tramiteIdInput"
+            type="text"
+            value={tramiteId}
+            onChange={(e) => setTramiteId(e.target.value)}
+            placeholder="Ingrese el ID (ej: 5) o Código (ej: TR-0005)"
+            disabled={loading}
+          />
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Buscando...' : 'Buscar'}
+          </button>
+        </div>
+      </form>
 
-      {!loading && !error && historial.length > 0 && (
-        <div className="table-container">
-          <h2>Historial del Trámite #{tramiteId}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha y Hora</th>
-                <th>Estado Anterior</th>
-                <th>Nuevo Estado</th>
-                <th>Observaciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historial.map((cambio, index) => (
-                <tr key={index}>
-                  <td>{formatearFecha(cambio.fecha_cambio)}</td>
-                  <td>{cambio.estado_anterior || '-'}</td>
-                  <td>{cambio.estado_nuevo}</td>
-                  <td>{cambio.observaciones || '-'}</td>
+      {/* Área de Resultados */}
+      <div className="results-container">
+        {error && <p className="error-message">{error}</p>}
+        
+        {!loading && !error && historial.length > 0 && (
+          <div className="table-container">
+            <h2>Historial del Trámite</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                  <th>Observaciones</th>
+                  {/* Agrega más columnas si tu modelo 'HistoricoEstado' las tiene */}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {!loading && !error && historial.length === 0 && tramiteId && (
-        <div className="no-results">
-          No se encontró historial para el trámite #{tramiteId}
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {historial.map(item => (
+                  <tr key={item.id}>
+                    {/* Asumimos que la columna de fecha se llama 'created_at' o 'fecha' */}
+                    <td>{new Date(item.created_at || item.fecha).toLocaleString('es-AR')}</td>
+                    {/* Asumimos que la columna de estado se llama 'estado' */}
+                    <td>{item.estado}</td>
+                    <td>{item.observaciones || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

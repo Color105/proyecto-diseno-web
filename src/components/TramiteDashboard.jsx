@@ -1,25 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import TramiteEditModal from './TramiteEditModal'; 
-import TramiteForm from './TramiteForm'; // CLAVE: Debe existir y estar en la ruta correcta
+import TramiteForm from './TramiteForm'; 
 
 const API_BASE = 'http://localhost:3000';
 
 function TramiteDashboard() {
     const [tramites, setTramites] = useState([]);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isFormModalOpen, setIsFormModalOpen] = useState(false); // Controla el modal de CREACIÓN
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [selectedTramite, setSelectedTramite] = useState(null);
 
     const fetchTramites = async () => {
         try {
-            const response = await fetch(`${API_BASE}/tramites`);
-            const data = await response.json();
-            setTramites(data);
+            // --- ¡¡AQUÍ ESTÁ LA CORRECCIÓN!! ---
+            const response = await fetch(`${API_BASE}/tramites.json`); // <-- Agregar .json
+            
+            const data = await response.json(); 
+            
+            const tramitesArray = Array.isArray(data) ? data : (data.tramites || []);
+            setTramites(tramitesArray); 
+            
         } catch (error) {
             console.error("Error al cargar trámites:", error);
+            setTramites([]); 
         }
     };
-
     useEffect(() => {
         fetchTramites();
     }, []);
@@ -54,7 +59,6 @@ function TramiteDashboard() {
             
             <header className="dashboard-header">
                 <h1>Gestión de Trámites ({tramites.length} en total)</h1>
-                {/* Botón que establece isFormModalOpen a true */}
                 <button 
                     className="btn-primary" 
                     onClick={() => setIsFormModalOpen(true)}
@@ -79,6 +83,9 @@ function TramiteDashboard() {
                         {tramites.map(tramite => (
                             <tr key={tramite.id}>
                                 <td>{tramite.codigo}</td>
+                                {/* Usamos '?' (optional chaining) por si 'tipo_tramite' o 'consultor'
+                                  vienen nulos desde la base de datos.
+                                */}
                                 <td>{tramite.tipo_tramite?.nombre}</td>
                                 <td><span className={`status-${tramite.estado}`}>{tramite.estado}</span></td>
                                 <td>{tramite.consultor?.nombre}</td>
@@ -104,7 +111,7 @@ function TramiteDashboard() {
             {/* MODAL DE CREACIÓN */}
             {isFormModalOpen && (
                 <TramiteForm 
-                    onClose={() => setIsFormModalOpen(false)} // Cierra el modal
+                    onClose={() => setIsFormModalOpen(false)}
                     onTramiteCreated={handleTramiteCreated} 
                 />
             )}

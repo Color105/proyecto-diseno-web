@@ -1,4 +1,3 @@
-// src/layouts/DashboardLayout.jsx
 import { Outlet, NavLink, Link, useLocation } from "react-router-dom";
 
 function Icon({ path, size = 18 }) {
@@ -14,6 +13,8 @@ const icons = {
   users: "M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M20 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z",
   types: "M4 7h16M4 12h16M4 17h10",
   history: "M3 12a9 9 0 1 0 3-6.7M3 3v6h6M12 7v6l4 2",
+  // Nuevo icono para Estados de Trámite (States/Flow)
+  states: "M5 21a2 2 0 0 1-2-2v-4h4v4a2 2 0 0 1-2 2ZM12 21a2 2 0 0 1-2-2v-4h4v4a2 2 0 0 1-2 2ZM19 21a2 2 0 0 1-2-2v-4h4v4a2 2 0 0 1-2 2ZM5 11v-4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M7 15V11M12 15V11M17 15V11",
 };
 
 function Breadcrumbs() {
@@ -57,6 +58,12 @@ export default function DashboardLayout() {
             <NavLink to="/admin/tipos" className={({isActive}) => "item" + (isActive ? " active" : "")}>
               <Icon path={icons.types} /> <span>Tipos</span>
             </NavLink>
+            
+            {/* NUEVO ENLACE AGREGADO: Estados de Trámite */}
+            <NavLink to="/admin/estados" className={({isActive}) => "item" + (isActive ? " active" : "")}>
+              <Icon path={icons.states} /> <span>Estados de Trámite</span>
+            </NavLink>
+            
             <NavLink to="/admin/historial" className={({isActive}) => "item" + (isActive ? " active" : "")}>
               <Icon path={icons.history} /> <span>Historial</span>
             </NavLink>

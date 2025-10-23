@@ -8,6 +8,8 @@ import App from "./App.jsx";
 
 const ABMConsultores   = lazy(() => import("./pages/ABMConsultores.jsx"));
 const ABMTipos         = lazy(() => import("./pages/ABMTipos.jsx"));
+// Corregido: la ruta de importación ahora usa "./pages"
+const ABMEstadoTramites = lazy(_c5 => import("./pages/ABMEstadoTramites.jsx"));
 const HistorialEstados = lazy(() => import("./pages/HistorialEstados.jsx"));
 const NotFound         = () => <div style={{ padding: 24 }}>404 — Página no encontrada</div>;
 
@@ -21,6 +23,8 @@ const router = createBrowserRouter([
       { index: true, element: <App /> },
       { path: "admin/consultores", element: withSuspense(<ABMConsultores />) },
       { path: "admin/tipos",       element: withSuspense(<ABMTipos />) },
+      // Ruta agregada para el nuevo ABM
+      { path: "admin/estados",     element: withSuspense(<ABMEstadoTramites />) },
       { path: "admin/historial",   element: withSuspense(<HistorialEstados />) },
       { path: "*", element: <NotFound /> },
     ],
