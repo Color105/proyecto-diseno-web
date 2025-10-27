@@ -1,0 +1,91 @@
+.abmClientes-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1rem;
+}
+
+.abmClientes-card {
+  background: #111318;           /* combina con tu theme oscuro */
+  border: 1px solid #1f2430;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+}
+
+.abmClientes-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  justify-content: space-between;
+  margin-bottom: .75rem;
+}
+
+.abmClientes-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.abmClientes-form .grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.abmClientes-form label {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  font-size: .9rem;
+}
+
+.abmClientes-form input,
+.abmClientes-form select,
+.search {
+  background: #0d0f14;
+  border: 1px solid #293144;
+  border-radius: 8px;
+  padding: .6rem .7rem;
+  color: #e5e7eb;
+}
+
+.divider {
+  height: 1px;
+  background: #232834;
+  margin: 1rem 0 .6rem;
+}
+
+.actions {
+  display: flex;
+  gap: .5rem;
+  margin-top: .9rem;
+}
+
+.btn {
+  background: #1f2430;
+  border: 1px solid #2a3142;
+  color: #cbd5e1;
+  padding: .55rem .85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .05s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.primary { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+.btn.ghost { background: transparent; }
+.btn.small { padding: .35rem .6rem; font-size: .85rem; }
+.btn.danger { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+.table-wrapper { overflow: auto; border-radius: 10px; border: 1px solid #232834; }
+.abmClientes-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.abmClientes-table th, .abmClientes-table td { padding: .6rem .7rem; border-bottom: 1px solid #1d2230; }
+.abmClientes-table thead th { background: #0d0f14; text-align: left; color: #c7d2fe; font-weight: 600; }
+
+.row-actions { display: flex; gap: .4rem; }
+
+.empty { text-align: center; color: #9ca3af; }
+
+@media (max-width: 900px) {
+  .abmClientes-form .grid { grid-template-columns: 1fr; }
+}

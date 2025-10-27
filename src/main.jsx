@@ -1,3 +1,4 @@
+// src/main.jsx
 import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -10,18 +11,16 @@ import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import App from "./App.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 
-// Tus componentes 'pages'
-const ABMConsultores    = lazy(() => import("./pages/ABMConsultores.jsx"));
-const ABMTipos          = lazy(() => import("./pages/ABMTipos.jsx"));
-const ABMEstadoTramites = lazy(() => import("./pages/ABMEstadoTramites.jsx"));
-const HistorialEstados  = lazy(() => import("./pages/HistorialEstados.jsx"));
+// Pages (lazy)
+const ABMClientes        = lazy(() => import("./pages/ABMClientes.jsx"));
+const ABMConsultores     = lazy(() => import("./pages/ABMConsultores.jsx"));
+const ABMTipos           = lazy(() => import("./pages/ABMTipos.jsx"));
+const ABMEstadoTramites  = lazy(() => import("./pages/ABMEstadoTramites.jsx"));
+const HistorialEstados   = lazy(() => import("./pages/HistorialEstados.jsx"));
+// ¡Ojo! TramiteDashboard está en components
+const TramiteDashboard   = lazy(() => import("./components/TramiteDashboard.jsx"));
 
-// --- ¡¡CORRECCIÓN!! Importamos desde 'components' ---
-const TramiteDashboard  = lazy(() => import("./components/TramiteDashboard.jsx")); 
-// --- Fin Corrección ---
-
-const NotFound          = () => <div style={{ padding: 24 }}>404 — Página no encontrada</div>;
-
+const NotFound = () => <div style={{ padding: 24 }}>404 — Página no encontrada</div>;
 const withSuspense = (el) => <Suspense fallback="Cargando…">{el}</Suspense>;
 
 const router = createBrowserRouter([
@@ -31,8 +30,8 @@ const router = createBrowserRouter([
     element: <DashboardLayout />,
     children: [
       { index: true, element: <App /> },
-      
-      // Ruta del Dashboard de Trámites
+
+      // Dashboard de Trámites (Admin/Recep)
       {
         path: "admin/tramites",
         element: (
@@ -42,11 +41,47 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Tus otras rutas admin
-      { path: "admin/consultores", element: (<ProtectedRoute roles={["admin"]}>{withSuspense(<ABMConsultores />)}</ProtectedRoute>), },
-      { path: "admin/tipos", element: (<ProtectedRoute roles={["admin"]}>{withSuspense(<ABMTipos />)}</ProtectedRoute>), },
-      { path: "admin/estados", element: (<ProtectedRoute roles={["admin"]}>{withSuspense(<ABMEstadoTramites />)}</ProtectedRoute>), },
-      { path: "admin/historial", element: (<ProtectedRoute roles={["admin"]}>{withSuspense(<HistorialEstados />)}</ProtectedRoute>), },
+      // Rutas Admin (protegidas)
+      {
+        path: "admin/clientes",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<ABMClientes />)}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/consultores",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<ABMConsultores />)}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/tipos",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<ABMTipos />)}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/estados",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<ABMEstadoTramites />)}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/historial",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<HistorialEstados />)}
+          </ProtectedRoute>
+        ),
+      },
 
       { path: "*", element: <NotFound /> },
     ],
@@ -60,4 +95,3 @@ createRoot(document.getElementById("root")).render(
     </AuthProvider>
   </StrictMode>
 );
-
