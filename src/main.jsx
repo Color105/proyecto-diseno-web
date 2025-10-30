@@ -17,8 +17,11 @@ const ABMConsultores     = lazy(() => import("./pages/ABMConsultores.jsx"));
 const ABMTipos           = lazy(() => import("./pages/ABMTipos.jsx"));
 const ABMEstadoTramites  = lazy(() => import("./pages/ABMEstadoTramites.jsx"));
 const HistorialEstados   = lazy(() => import("./pages/HistorialEstados.jsx"));
-// ¡Ojo! TramiteDashboard está en components
 const TramiteDashboard   = lazy(() => import("./components/TramiteDashboard.jsx"));
+
+// --- ¡¡NUEVAS PÁGINAS A IMPORTAR!! ---
+const GestionVersiones = lazy(() => import("./pages/GestionVersiones.jsx"));
+const EditorFlujo      = lazy(() => import("./pages/EditorFlujo.jsx"));
 
 const NotFound = () => <div style={{ padding: 24 }}>404 — Página no encontrada</div>;
 const withSuspense = (el) => <Suspense fallback="Cargando…">{el}</Suspense>;
@@ -66,6 +69,27 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      
+      // --- ¡¡NUEVA RUTA DE VERSIONES!! ---
+      {
+        path: "admin/tipos/:tipoTramiteId/versiones",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<GestionVersiones />)}
+          </ProtectedRoute>
+        ),
+      },
+      // --- ¡¡NUEVA RUTA DEL EDITOR DE FLUJO!! ---
+      {
+        path: "admin/versiones/:versionId/editar",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<EditorFlujo />)}
+          </ProtectedRoute>
+        ),
+      },
+      // --- FIN DE NUEVAS RUTAS ---
+
       {
         path: "admin/estados",
         element: (

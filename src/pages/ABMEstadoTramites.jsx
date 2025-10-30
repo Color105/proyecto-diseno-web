@@ -1,16 +1,14 @@
+// src/pages/ABMEstadoTramites.jsx
 import React, { useState, useEffect } from 'react';
-// Debes crear estas funciones en tu archivo services/adminApi.js
-// usando la estructura del backend (ej: /estado_tramites.json)
 import { 
   listEstados, 
   createEstado, 
   updateEstado, 
   deleteEstado 
-} from '../services/adminApi'; // <-- CORRECCIÓN 1: Coincide mayúsculas 'AdminApi'
+} from '../services/adminApi';
 
-import './ABMEstadoTramites.css'; // <-- CORRECCIÓN 2: Se agregó la 's'
+import './ABMEstadoTramites.css'; 
 
-// Componente principal para la gestión de Estados de Trámite
 export default function ABMEstadoTramites() {
   const [estados, setEstados] = useState([]);
   const [editingEstado, setEditingEstado] = useState(null);
@@ -28,12 +26,13 @@ export default function ABMEstadoTramites() {
   const loadEstados = async () => {
     setLoading(true);
     try {
-      // La API debe devolver un array de objetos EstadoTramite
-      const data = await listEstados();
-      setEstados(data || []);
+      // --- ¡¡CORRECCIÓN AQUÍ!! ---
+      // axios devuelve un objeto { data: [...] }, por eso extraemos 'response.data'
+      const response = await listEstados();
+      setEstados(response.data || []); 
+      // --- FIN DE LA CORRECCIÓN ---
     } catch (error) {
       console.error('Error al cargar estados de trámite:', error);
-      // Usar modal o mensaje de error, no alert()
       alert('Error al cargar estados de trámite: ' + (error.message || 'Error desconocido'));
     } finally {
       setLoading(false);
@@ -43,12 +42,13 @@ export default function ABMEstadoTramites() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // El payload debe coincidir con los strong_params del controller
+      const payload = { estado_tramite: formData }; 
+
       if (editingEstado) {
-        // Llama a PUT/PATCH
-        await updateEstado(editingEstado.id, formData);
+        await updateEstado(editingEstado.id, payload);
       } else {
-        // Llama a POST
-        await createEstado(formData);
+        await createEstado(payload);
       }
       loadEstados();
       resetForm();
@@ -70,7 +70,6 @@ export default function ABMEstadoTramites() {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Está seguro de eliminar este estado de trámite?')) return;
     try {
-      // Llama a DELETE
       await deleteEstado(id);
       loadEstados();
     } catch (error) {

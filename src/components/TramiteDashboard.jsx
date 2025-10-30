@@ -1,12 +1,11 @@
+// src/components/TramiteDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { API_URL } from '../config'; // Asumimos que src/config.js existe
+import { API_URL } from '../config'; 
 
-// --- ¡¡CORRECCIÓN!! Importamos desde la misma carpeta './' ---
 import TramiteEditModal from './TramiteEditModal'; 
 import TramiteForm from './TramiteForm'; 
-import './TramiteDashboard.css'; // Asumimos que src/components/TramiteDashboard.css existe
-// --- Fin Corrección ---
+import './TramiteDashboard.css'; 
 
 function TramiteDashboard() {
     const [tramites, setTramites] = useState([]);
@@ -23,6 +22,8 @@ function TramiteDashboard() {
         setIsLoading(true);
         setErrorMessage(null);
         try {
+            // NOTA: Esto no usa listTramites() de adminApi, usa fetch directo.
+            // ¡Esto está bien! No es la causa del error.
             const response = await fetch(`${API_URL}/tramites`, { 
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,6 +38,7 @@ function TramiteDashboard() {
                 throw new Error(`Error ${response.status}: No se pudieron cargar los trámites.`);
             }
             const data = await response.json(); 
+            // Esto está perfecto, ya que 'fetch' devuelve el array directamente.
             setTramites(Array.isArray(data) ? data : []); 
         } catch (error) {
             console.error("Error al cargar trámites:", error);
@@ -109,16 +111,24 @@ function TramiteDashboard() {
                             </thead>
                             <tbody>
                                 {tramites.map(tramite => {
-                                    const estado = tramite.estado || 'desconocido'; 
+                                    // --- ¡¡INICIO DE LA CORRECCIÓN!! ---
+                                    // 1. Leemos el nombre del objeto 'estado_tramite'
+                                    const estadoNombre = tramite.estado_tramite?.nombreEstadoTramite || 'desconocido'; 
+                                    // 2. Leemos el código para la clase CSS
+                                    const estadoCodigo = tramite.estado_tramite?.codEstadoTramite || 'desconocido';
+                                    // --- FIN DE LA CORRECCIÓN ---
+
                                     const consultorNombre = tramite.consultor?.nombre || 'Sin asignar';
 
                                     return (
                                         <tr key={tramite.id}>
                                             <td>{tramite.codigo || `TR-${tramite.id}`}</td>
+                                            {/* 3. 'tipo_tramite' viene a través de la versión, pero el backend lo incluye */}
                                             <td>{tramite.tipo_tramite?.nombre || 'N/A'}</td>
                                             <td>
-                                                <span className={`status-${estado.toLowerCase()}`}>
-                                                    {estado}
+                                                {/* 4. Usamos las nuevas variables */}
+                                                <span className={`status-${estadoCodigo.toLowerCase()}`}>
+                                                    {estadoNombre}
                                                 </span>
                                             </td>
                                             <td>{consultorNombre}</td>

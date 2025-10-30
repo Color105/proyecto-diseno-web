@@ -1,3 +1,4 @@
+// src/components/TramiteForm.jsx
 import React, { useState, useEffect } from 'react';
 // ¡No usamos API_BASE hardcodeado!
 // const API_BASE = 'http://localhost:3000';
@@ -7,16 +8,17 @@ function TramiteForm({ token, apiUrl, onClose, onTramiteCreated }) {
   const [monto, setMonto] = useState('');
   const [consultorId, setConsultorId] = useState('');
   const [tipoTramiteId, setTipoTramiteId] = useState('');
-  
+  const [clienteId, setClienteId] = useState(''); // <-- 1. AÑADIR ESTADO PARA CLIENTE
+
   const [consultores, setConsultores] = useState([]);
   const [tiposTramite, setTiposTramite] = useState([]);
+  const [clientes, setClientes] = useState([]); // <-- 2. AÑADIR ESTADO PARA LISTA DE CLIENTES
   
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // 2. useEffect para cargar los combos (selects)
   useEffect(() => {
-    // No hacer nada si no tenemos el token
     if (!token) {
       setError("Error: No hay token de autenticación.");
       return;
@@ -26,39 +28,40 @@ function TramiteForm({ token, apiUrl, onClose, onTramiteCreated }) {
       setIsLoading(true);
       setError(null);
       
-      // 3. Preparamos los headers de autenticación
       const authHeaders = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       };
 
       try {
-        // Usamos Promise.all para cargar ambos al mismo tiempo
-        const [resConsultores, resTipos] = await Promise.all([
-          fetch(`${apiUrl}/consultors`, { headers: authHeaders }), // <-- CORREGIDO: /consultores -> /consultors
-          fetch(`${apiUrl}/tipo_tramites`, { headers: authHeaders })  // <-- CORREGIDO: /tipos_tramite -> /tipo_tramites
+        // --- 3. AÑADIR FETCH DE CLIENTES A PROMISE.ALL ---
+        const [resConsultores, resTipos, resClientes] = await Promise.all([
+          fetch(`${apiUrl}/consultors`, { headers: authHeaders }),
+          fetch(`${apiUrl}/tipo_tramites`, { headers: authHeaders }),
+          fetch(`${apiUrl}/clientes`, { headers: authHeaders }) // <-- AÑADIDO
         ]);
 
-        if (!resConsultores.ok || !resTipos.ok) {
+        if (!resConsultores.ok || !resTipos.ok || !resClientes.ok) { // <-- AÑADIDO
           throw new Error('Error al cargar combos de selección');
         }
 
         const dataConsultores = await resConsultores.json();
         const dataTipos = await resTipos.json();
+        const dataClientes = await resClientes.json(); // <-- AÑADIDO
 
         setConsultores(Array.isArray(dataConsultores) ? dataConsultores : []);
         setTiposTramite(Array.isArray(dataTipos) ? dataTipos : []);
+        setClientes(Array.isArray(dataClientes) ? dataClientes : []); // <-- AÑADIDO
 
       } catch (err) {
         console.error(err);
-        setError(err.message || 'No pude cargar consultores/tipos.');
+        setError(err.message || 'No pude cargar consultores/tipos/clientes.');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCombos();
-    // Dependemos de 'token' y 'apiUrl'
   }, [token, apiUrl]);
 
 
@@ -67,31 +70,34 @@ function TramiteForm({ token, apiUrl, onClose, onTramiteCreated }) {
     setIsLoading(true);
     setError(null);
 
+    // --- 4. AÑADIR CLIENTE_ID AL PAYLOAD ---
     const payload = {
       monto: parseFloat(monto),
       consultor_id: parseInt(consultorId, 10),
       tipo_tramite_id: parseInt(tipoTramiteId, 10),
+      cliente_id: parseInt(clienteId, 10) // <-- AÑADIDO
     };
 
     try {
-      // 4. Usamos 'token' y 'apiUrl' también para CREAR
       const response = await fetch(`${apiUrl}/tramites`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // ¡Autenticación!
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ tramite: payload }), // Rails espera { tramite: { ... } }
+        body: JSON.stringify({ tramite: payload }), 
       });
 
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.error || errData.errors.join(', ') || 'Error al crear.');
+        // El error ahora vendrá de nuestro controller
+        const errorMsg = errData.error || errData.errors.join(', ') || 'Error al crear.';
+        throw new Error(errorMsg);
       }
 
       const newTramite = await response.json();
-      onTramiteCreated?.(newTramite); // Informamos al dashboard
-      onClose(); // Cerramos el modal
+      onTramiteCreated?.(newTramite);
+      onClose();
 
     } catch (err) {
       setError(err.message);
@@ -109,6 +115,23 @@ function TramiteForm({ token, apiUrl, onClose, onTramiteCreated }) {
         <form onSubmit={handleSubmit} className="tramite-form">
           
           {error && <div className="error-message">{error}</div>}
+
+          {/* --- 5. AÑADIR EL DROPDOWN DE CLIENTE --- */}
+          <label>
+            Cliente:
+            <select
+              value={clienteId}
+              onChange={(e) => setClienteId(e.target.value)}
+              disabled={isLoading}
+              required
+            >
+              <option value="">Seleccione un cliente</option>
+              {clientes.map(c => (
+                // Asumo que tu modelo Cliente tiene 'nombre_apellido_cliente'
+                <option key={c.id} value={c.id}>{c.nombre_apellido_cliente}</option> 
+              ))}
+            </select>
+          </label>
 
           <label>
             Consultor Responsable:
@@ -169,4 +192,3 @@ function TramiteForm({ token, apiUrl, onClose, onTramiteCreated }) {
 }
 
 export default TramiteForm;
-

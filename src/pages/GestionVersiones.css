@@ -1,0 +1,157 @@
+/* src/pages/GestionVersiones.css */
+
+.versiones-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.versiones-container h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.versiones-container > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+.versiones-container > a:hover {
+  background-color: #444;
+  border-color: #555;
+}
+
+/* Base de la Tabla */
+.table-wrapper {
+  overflow-x: auto;
+  background-color: var(--surface-dark);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+}
+
+.tramites-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tramites-table th, 
+.tramites-table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.tramites-table th {
+  background-color: rgba(51, 51, 51, 0.5);
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tramites-table td {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.tramites-table tr:hover td {
+  background-color: rgba(51, 51, 51, 0.3);
+}
+
+/* Píldoras de Estado */
+.estado-activo,
+.estado-borrador,
+.estado-archivado,
+.estado-programado {
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-block;
+}
+.estado-activo { background-color: rgba(34, 197, 94, 0.2); color: #22c55e; }
+.estado-borrador { background-color: rgba(163, 180, 200, 0.2); color: #a3b4c8; }
+.estado-archivado, .estado-programado { background-color: rgba(113, 113, 122, 0.2); color: #71717a; }
+
+/* Contenedor de Acciones (para espaciado) */
+.acciones-versiones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem; /* ¡Espacio entre botones! */
+}
+
+/* --- ESTILOS DE BOTONES CON ÍCONOS --- */
+.btn-primary,
+.btn-secondary,
+.btn-danger-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; /* Espacio entre ícono y texto */
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+/* Alinear el ícono */
+.btn-primary svg,
+.btn-secondary svg,
+.btn-danger-outline svg {
+  font-size: 1.1em;
+  stroke-width: 2.5;
+}
+
+/* Acción Primaria (Azul) */
+.btn-primary {
+  background-color: var(--accent-color);
+  color: white;
+}
+.btn-primary:hover {
+  filter: brightness(110%);
+}
+
+/* Acción Secundaria (Gris) */
+.btn-secondary {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+  background-color: #444;
+  border-color: #555;
+}
+
+/* Acción de Peligro (Roja) */
+.btn-danger-outline {
+  background-color: transparent;
+  color: #fca5a5;
+  border: 1px solid #dc2626;
+}
+.btn-danger-outline:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #ef4444;
+}

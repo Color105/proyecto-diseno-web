@@ -1,4 +1,5 @@
 // src/services/adminApi.js
+import api from "../api"; // <-- ¡¡IMPORTANTE!!
 import { API_URL } from "../config";
 
 // -------- headers con auth ----------
@@ -88,61 +89,42 @@ export const deleteTipo = (id) =>
    ESTADOS DE TRÁMITE (EstadoTramitesController)
    ========================================================= */
 export const listEstados = () =>
-  fetch(`${API_URL}/estado_tramites`, { headers: getAuthHeaders() }).then(handle);
+  api.get("/estado_tramites");
 
 export const createEstado = (p) =>
-  fetch(`${API_URL}/estado_tramites`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ estado_tramite: p }),
-  }).then(handle);
+  api.post("/estado_tramites", { estado_tramite: p });
 
 export const updateEstado = (id, p) =>
-  fetch(`${API_URL}/estado_tramites/${id}`, {
-    method: "PATCH",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ estado_tramite: p }),
-  }).then(handle);
+  api.patch(`/estado_tramites/${id}`, p);
 
 export const deleteEstado = (id) =>
-  fetch(`${API_URL}/estado_tramites/${id}`, {
-    method: "DELETE",
-    headers: getAuthHeaders(),
-  }).then(handle);
+  api.delete(`/estado_tramites/${id}`);
 
 /* =========================================================
    HISTORIAL POR TRÁMITE
    ========================================================= */
 export const historialPorTramite = (tramiteId) =>
-  fetch(`${API_URL}/tramites/${tramiteId}/historico_estados`, {
-    headers: getAuthHeaders(),
-  }).then(handle);
+  api.get(`/tramites/${tramiteId}/historico_estados`);
 
 /* =========================================================
    TRÁMITES (panel Admin/Recep y vistas Cliente)
    ========================================================= */
 export const listTramites = (q = {}) => {
-  const params = new URLSearchParams(q).toString();
-  const url = params ? `${API_URL}/tramites?${params}` : `${API_URL}/tramites`;
-  return fetch(url, { headers: getAuthHeaders() }).then(handle);
+  return api.get("/tramites", { params: q });
 };
 
-export const createTramite = (p) =>
-  fetch(`${API_URL}/tramites`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ tramite: p }),
-  }).then(handle);
+export const createTramite = (p) => {
+  return api.post("/tramites", { tramite: p });
+};
 
-export const deleteTramite = (id) =>
-  fetch(`${API_URL}/tramites/${id}`, {
-    method: "DELETE",
-    headers: getAuthHeaders(),
-  }).then(handle);
+export const deleteTramite = (id) => {
+  return api.delete(`/tramites/${id}`);
+};
 
 /* =========================================================
    CLIENTES (ClientesController)  [solo admin]
    ========================================================= */
+// ... (tu código de clientes va aquí, no lo repito para ahorrar espacio) ...
 export const buildClientePayload = (
   {
     nombre_apellido_cliente = "",
@@ -200,3 +182,58 @@ export const deleteCliente = (id) =>
     method: "DELETE",
     headers: getAuthHeaders(),
   }).then(handle);
+
+
+/* =========================================================
+   == NUEVO: VERSIONADO (VersionsController) ==
+   (Usando Axios 'api' para código más limpio)
+   ========================================================= */
+
+// GET /tipo_tramites/:tipoTramiteId/versiones
+export const getVersionesPorTipo = (tipoTramiteId) =>
+  api.get(`/tipo_tramites/${tipoTramiteId}/versiones`);
+
+// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
+// GET /versiones/:id
+export const getVersionDetalle = (versionId) =>
+  api.get(`/versiones/${versionId}`);
+
+// POST /tipo_tramites/:tipoTramiteId/versiones (Para crear V1)
+export const createPrimeraVersion = (tipoTramiteId) =>
+  api.post(`/tipo_tramites/${tipoTramiteId}/versiones`);
+
+// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
+// POST /versiones/:id/clonar
+export const clonarVersion = (versionId) =>
+  api.post(`/versiones/${versionId}/clonar`);
+
+// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
+// POST /versiones/:id/activar
+export const activarVersion = (versionId) =>
+  api.post(`/versiones/${versionId}/activar`);
+
+// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
+// DELETE /versiones/:id
+export const deleteVersionBorrador = (versionId) =>
+  api.delete(`/versiones/${versionId}`);
+
+/* =========================================================
+   == NUEVO: TRANSICIONES (TransicionPosiblesController) ==
+   (Usando Axios 'api' para código más limpio)
+   ========================================================= */
+
+// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
+// POST /versiones/:versionId/transiciones
+export const addTransicion = (versionId, origenId, siguienteId) => {
+  const body = {
+    transicion_posible: {
+      estado_origen_id: origenId,
+      estado_siguiente_id: siguienteId,
+    },
+  };
+  return api.post(`/versiones/${versionId}/transiciones`, body);
+};
+
+// DELETE /transiciones/:transicionId
+export const deleteTransicion = (transicionId) =>
+  api.delete(`/transiciones/${transicionId}`);

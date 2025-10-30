@@ -1,0 +1,181 @@
+/* src/pages/EditorFlujo.css */
+
+.editor-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Botón "Volver" */
+.editor-container > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+.editor-container > a:hover {
+  background-color: #444;
+  border-color: #555;
+}
+
+/* Títulos y Subtítulos */
+.editor-container h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+.editor-container > p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.editor-container h2,
+.editor-container h3 {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+.editor-container h3 {
+  margin-top: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Formulario "Añadir Transición" */
+.form-transicion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  background-color: var(--surface-dark);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+}
+.form-transicion label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+.form-transicion select {
+  width: 250px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  background-color: var(--background-dark);
+  color: var(--text-primary);
+}
+.form-transicion select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+/* Botón de añadir con ícono */
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-add svg {
+  font-size: 1.1em;
+  stroke-width: 2.5;
+}
+.btn-add:hover {
+  filter: brightness(110%);
+}
+
+/* Área del "Diagrama" del Circuito */
+.circuito-diagrama {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.nodo-origen {
+  background-color: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.nodo-origen h4 {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+.nodo-origen h4 strong {
+  color: var(--accent-color);
+}
+.nodo-origen ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+.nodo-origen li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+.nodo-origen li:last-child {
+  border-bottom: none;
+}
+.nodo-origen li em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Botón [X] para eliminar transición */
+.delete-transicion {
+  background-color: transparent;
+  border: 1px solid #dc2626;
+  color: #fca5a5;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+.delete-transicion:hover {
+  background-color: #dc2626;
+  color: white;
+}

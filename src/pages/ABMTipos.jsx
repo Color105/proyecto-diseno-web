@@ -1,4 +1,6 @@
+// src/pages/ABMTipos.jsx
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- 1. IMPORTAR useNavigate
 import { listTipos, createTipo, updateTipo, deleteTipo } from '../services/adminApi';
 import '../components/TramiteDashboard.css'; // Reutilizamos el CSS general
 
@@ -14,6 +16,8 @@ export default function ABMTipos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  const navigate = useNavigate(); // <-- 2. INICIALIZAR EL HOOK
 
   useEffect(() => {
     loadTipos();
@@ -93,6 +97,11 @@ export default function ABMTipos() {
     resetForm();
     setShowForm(true);
   }
+
+  // <-- 3. AÑADIR LA FUNCIÓN PARA NAVEGAR
+  const handleGestionarVersiones = (tipoId) => {
+    navigate(`/admin/tipos/${tipoId}/versiones`);
+  };
 
   return (
     // ¡Aquí usamos el .dashboard-container más simple!
@@ -179,8 +188,13 @@ export default function ABMTipos() {
                   <button onClick={() => handleEdit(tipo)} className="btn-secondary" style={{marginRight: '10px'}}>
                     Editar
                   </button>
-                  <button onClick={() => handleDelete(tipo.id)} className="btn-secondary" style={{backgroundColor: '#b91c1c'}}>
+                  <button onClick={() => handleDelete(tipo.id)} className="btn-secondary" style={{backgroundColor: '#b91c1c', marginRight: '10px'}}>
                     Eliminar
+                  </button>
+                  
+                  {/* // <-- 3. AÑADIR EL BOTÓN DE VERSIONES */}
+                  <button onClick={() => handleGestionarVersiones(tipo.id)} className="btn-secondary" title="Gestionar Versiones">
+                    Versiones 📜
                   </button>
                 </td>
               </tr>
