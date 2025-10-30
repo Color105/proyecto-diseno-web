@@ -7,9 +7,7 @@ import {
   addTransicion, 
   deleteTransicion 
 } from '../services/adminApi';
-// Importamos los íconos minimalistas
 import { FiPlus, FiTrash2, FiChevronLeft } from 'react-icons/fi';
-// Importamos el CSS nuevo
 import './EditorFlujo.css'; 
 
 const EditorFlujo = () => {
@@ -31,12 +29,19 @@ const EditorFlujo = () => {
         listEstados() 
       ]);
       
+      const estados = estadosRes.data || [];
       setVersionData(versionRes.data);
-      setTodosLosEstados(estadosRes.data);
+      setTodosLosEstados(estados);
       
-      if (estadosRes.data.length > 0) {
-        setOrigenId(currentId => currentId || estadosRes.data[0].id);
-        setSiguienteId(currentId => currentId || estadosRes.data[0].id);
+      if (estados.length > 0) {
+        // 1. El default "Desde:" SIEMPRE es el estado inicial
+        const estadoInicial = estados.find(e => e.es_estado_inicial);
+        // Si ya hay un 'origenId' seleccionado, lo respetamos, si no, usamos el inicial
+        setOrigenId(currentId => currentId || estadoInicial?.id || '');
+        
+        // 2. El default "Hacia:" es el primer estado NO inicial
+        const primerDestino = estados.find(e => !e.es_estado_inicial);
+        setSiguienteId(currentId => currentId || primerDestino?.id || '');
       }
     } catch (error) {
       console.error("Error al cargar datos del editor", error);
@@ -60,8 +65,7 @@ const EditorFlujo = () => {
       await addTransicion(versionId, origenId, siguienteId);
       fetchData(); 
     } catch (error) {
-      const errorMsg = error.response?.data?.errors?.base?.join(", ") || 
-                       error.response?.data?.errors?.join(", ") || 
+      const errorMsg = error.response?.data?.errors?.join(", ") || 
                        "Error desconocido";
       alert('Error al añadir la transición: ' + errorMsg);
     }
@@ -84,6 +88,25 @@ const EditorFlujo = () => {
   const { version, circuito } = versionData;
   const esEditable = version.estado === 'Borrador';
 
+  // --- LÓGICA DE FILTRADO DE DROPDOWNS ---
+
+  // 1. Lista para "HACIA:" (Todos MENOS el inicial)
+  const estadosDeDestinoDisponibles = todosLosEstados.filter(e => e.es_estado_inicial === false);
+
+  // 2. Lista para "DESDE:"
+  // IDs de los estados que ya son un destino en el circuito
+  const estadosAlcanzadosIds = new Set(
+    circuito.flatMap(c => c.posiblesDestinos.map(d => d.estado.id))
+  );
+  
+  // La lista "Desde" contiene:
+  // 1. El estado inicial (SIEMPRE)
+  // 2. Cualquier estado que ya haya sido "alcanzado"
+  const estadosDeOrigenDisponibles = todosLosEstados.filter(e => 
+    e.es_estado_inicial === true || 
+    estadosAlcanzadosIds.has(e.id)
+  );
+
   return (
     <div className="editor-container">
       <Link to={`/admin/tipos/${version.tipo_tramite_id}/versiones`}>
@@ -98,13 +121,15 @@ const EditorFlujo = () => {
           <div>
             <label>Desde:</label>
             <select value={origenId} onChange={e => setOrigenId(e.target.value)}>
-              {todosLosEstados.map(e => <option key={e.id} value={e.id}>{e.nombreEstadoTramite}</option>)}
+              {/* Usamos la lista filtrada 'estadosDeOrigenDisponibles' */}
+              {estadosDeOrigenDisponibles.map(e => <option key={e.id} value={e.id}>{e.nombreEstadoTramite}</option>)}
             </select>
           </div>
           <div>
             <label>Hacia:</label>
             <select value={siguienteId} onChange={e => setSiguienteId(e.target.value)}>
-              {todosLosEstados.map(e => <option key={e.id} value={e.id}>{e.nombreEstadoTramite}</option>)}
+              {/* Usamos la lista filtrada 'estadosDeDestinoDisponibles' */}
+              {estadosDeDestinoDisponibles.map(e => <option key={e.id} value={e.id}>{e.nombreEstadoTramite}</option>)}
             </select>
           </div>
           <button type="submit" className="btn-add">
@@ -138,7 +163,7 @@ const EditorFlujo = () => {
           </div>
         ))}
         {circuito.length === 0 && !esEditable && <p>Este circuito no tiene transiciones.</p>}
-        {circuito.length === 0 && esEditable && <p>Este circuito está vacío. Empieza añadiendo transiciones en el formulario de arriba.</p>}
+        {circuito.length === 0 && esEditable && <p>Este circuito está vacío. Empieza añadiendo una transición desde 'Ingresado'.</p>}
       </div>
     </div>
   );

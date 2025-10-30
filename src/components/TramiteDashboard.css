@@ -425,3 +425,41 @@ td.acciones-versiones {
   background-color: #dc2626;
   color: white;
 }
+/* src/components/TramiteDashboard.css */
+
+/* ... (todos tus estilos existentes) ... */
+
+/* Espaciado para la celda de acciones en la tabla de trámites */
+.acciones-tramites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem; /* Espacio entre botones */
+}
+
+/* Botón de peligro "outline" (reusado de GestionVersiones) */
+.btn-danger-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background-color: transparent;
+  color: #fca5a5;
+  border: 1px solid #dc2626;
+  transition: all 0.2s ease;
+}
+.btn-danger-outline:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #ef4444;
+}
+
+/* Asegurarnos que el btn-primary de la tabla sea pequeño */
+.tramites-table .btn-primary {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}

@@ -1,7 +1,8 @@
-// src/components/TramiteDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { API_URL } from '../config'; 
+// --- 1. IMPORTAR deleteTramite ---
+import { deleteTramite } from '../services/adminApi'; 
 
 import TramiteEditModal from './TramiteEditModal'; 
 import TramiteForm from './TramiteForm'; 
@@ -15,6 +16,9 @@ function TramiteDashboard() {
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [selectedTramite, setSelectedTramite] = useState(null);
     
+    // --- 2. AÑADIR ESTADO PARA EL MODAL DE BORRADO ---
+    const [deletingId, setDeletingId] = useState(null);
+    
     const { token, logout } = useAuth(); 
 
     const fetchTramites = async () => {
@@ -22,8 +26,6 @@ function TramiteDashboard() {
         setIsLoading(true);
         setErrorMessage(null);
         try {
-            // NOTA: Esto no usa listTramites() de adminApi, usa fetch directo.
-            // ¡Esto está bien! No es la causa del error.
             const response = await fetch(`${API_URL}/tramites`, { 
                 headers: {
                     'Content-Type': 'application/json',
@@ -38,7 +40,6 @@ function TramiteDashboard() {
                 throw new Error(`Error ${response.status}: No se pudieron cargar los trámites.`);
             }
             const data = await response.json(); 
-            // Esto está perfecto, ya que 'fetch' devuelve el array directamente.
             setTramites(Array.isArray(data) ? data : []); 
         } catch (error) {
             console.error("Error al cargar trámites:", error);
@@ -53,7 +54,24 @@ function TramiteDashboard() {
         fetchTramites();
     }, [token]); 
 
-    // --- Manejadores de Modales (sin cambios) ---
+    // --- 3. AÑADIR LÓGICA DE BORRADO ---
+    const handleDeleteClick = (id) => {
+        setDeletingId(id);
+    };
+
+    const executeDelete = async () => {
+        if (!deletingId) return;
+        try {
+            await deleteTramite(deletingId); // Llama a la API de Axios
+            setDeletingId(null);
+            fetchTramites(); // Recarga la lista
+        } catch (err) {
+            setErrorMessage('Error al eliminar el trámite: ' + (err.response?.data?.error || err.message));
+            setDeletingId(null);
+        }
+    };
+    // --- FIN LÓGICA DE BORRADO ---
+
     const handleTramiteUpdated = (updatedTramite) => {
         setTramites(prevTramites => 
             prevTramites.map(t => 
@@ -111,30 +129,26 @@ function TramiteDashboard() {
                             </thead>
                             <tbody>
                                 {tramites.map(tramite => {
-                                    // --- ¡¡INICIO DE LA CORRECCIÓN!! ---
-                                    // 1. Leemos el nombre del objeto 'estado_tramite'
                                     const estadoNombre = tramite.estado_tramite?.nombreEstadoTramite || 'desconocido'; 
-                                    // 2. Leemos el código para la clase CSS
                                     const estadoCodigo = tramite.estado_tramite?.codEstadoTramite || 'desconocido';
-                                    // --- FIN DE LA CORRECCIÓN ---
-
                                     const consultorNombre = tramite.consultor?.nombre || 'Sin asignar';
 
                                     return (
                                         <tr key={tramite.id}>
                                             <td>{tramite.codigo || `TR-${tramite.id}`}</td>
-                                            {/* 3. 'tipo_tramite' viene a través de la versión, pero el backend lo incluye */}
                                             <td>{tramite.tipo_tramite?.nombre || 'N/A'}</td>
                                             <td>
-                                                {/* 4. Usamos las nuevas variables */}
                                                 <span className={`status-${estadoCodigo.toLowerCase()}`}>
                                                     {estadoNombre}
                                                 </span>
                                             </td>
                                             <td>{consultorNombre}</td>
                                             <td>${parseFloat(tramite.monto || 0).toFixed(2)}</td>
-                                            <td>
+                                            
+                                            {/* --- 4. AÑADIR BOTÓN DE ELIMINAR --- */}
+                                            <td className="acciones-tramites"> {/* Añadimos clase para espaciado */}
                                                 <button className="btn-primary" onClick={() => openEditModal(tramite)}>Editar</button>
+                                                <button className="btn-danger-outline" onClick={() => handleDeleteClick(tramite.id)}>Eliminar</button>
                                             </td>
                                         </tr>
                                     );
@@ -163,8 +177,28 @@ function TramiteDashboard() {
                     apiUrl={API_URL}
                 />
             )}
+
+            {/* --- 5. AÑADIR EL MODAL DE CONFIRMACIÓN --- */}
+            {deletingId && (
+                <div className="modal-backdrop">
+                    <div className="modal-content" style={{maxWidth: '400px'}}>
+                        <h3 style={{marginTop: 0}}>Confirmar Eliminación</h3>
+                        <p>¿Está seguro de eliminar el trámite {tramites.find(t => t.id === deletingId)?.codigo}? Esta acción no se puede deshacer.</p>
+                        <div className="form-actions">
+                            {/* --- ¡¡CORRECCIÓN!! Se quitó el apóstrofe extra en type'="button" --- */}
+                            <button type="button" onClick={executeDelete} className="btn-primary" style={{backgroundColor: '#b91c1c'}}>
+                                Sí, Eliminar
+                            </button>
+                            <button type="button" onClick={() => setDeletingId(null)} className="btn-secondary">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
 export default TramiteDashboard;
+
