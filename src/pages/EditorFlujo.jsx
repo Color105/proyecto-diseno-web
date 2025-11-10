@@ -1,4 +1,3 @@
-// src/pages/EditorFlujo.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -36,16 +35,18 @@ const EditorFlujo = () => {
       if (estados.length > 0) {
         // 1. El default "Desde:" SIEMPRE es el estado inicial
         const estadoInicial = estados.find(e => e.es_estado_inicial);
-        // Si ya hay un 'origenId' seleccionado, lo respetamos, si no, usamos el inicial
         setOrigenId(currentId => currentId || estadoInicial?.id || '');
         
         // 2. El default "Hacia:" es el primer estado NO inicial
-        const primerDestino = estados.find(e => !e.es_estado_inicial);
+        // --- ¡¡CORRECCIÓN AQUÍ TAMBIÉN!! ---
+        // Usamos la misma lógica de filtro (!== true) para encontrar el primer destino
+        const primerDestino = estados.find(e => e.es_estado_inicial !== true);
         setSiguienteId(currentId => currentId || primerDestino?.id || '');
       }
     } catch (error) {
       console.error("Error al cargar datos del editor", error);
-      alert('Error al cargar datos: ' + (error.response?.data?.error || error.message));
+      // Recomiendo no usar alert() para errores de carga
+      // alert('Error al cargar datos: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,9 @@ const EditorFlujo = () => {
   const handleAddTransicion = async (e) => {
     e.preventDefault();
     if (!origenId || !siguienteId) {
-      alert('Debes seleccionar un estado de origen y uno siguiente.');
+      // Recomiendo no usar alert()
+      // alert('Debes seleccionar un estado de origen y uno siguiente.');
+      console.warn('Selección de origen o siguiente vacía');
       return;
     }
     try {
@@ -67,17 +70,20 @@ const EditorFlujo = () => {
     } catch (error) {
       const errorMsg = error.response?.data?.errors?.join(", ") || 
                        "Error desconocido";
-      alert('Error al añadir la transición: ' + errorMsg);
+      // alert('Error al añadir la transición: ' + errorMsg);
+      console.error('Error al añadir la transición: ' + errorMsg);
     }
   };
   
   const handleDeleteTransicion = async (transicionId) => {
+    // Recomiendo usar un modal de confirmación en lugar de window.confirm
     if (window.confirm('¿Seguro que quieres eliminar esta transición?')) {
       try {
         await deleteTransicion(transicionId);
         fetchData(); // Recargar
       } catch (err) {
-        alert('Error al eliminar: ' + (err.response?.data?.error || err.message));
+        // alert('Error al eliminar: ' + (err.response?.data?.error || err.message));
+        console.error('Error al eliminar: ' + (err.response?.data?.error || err.message));
       }
     }
   };
@@ -91,7 +97,9 @@ const EditorFlujo = () => {
   // --- LÓGICA DE FILTRADO DE DROPDOWNS ---
 
   // 1. Lista para "HACIA:" (Todos MENOS el inicial)
-  const estadosDeDestinoDisponibles = todosLosEstados.filter(e => e.es_estado_inicial === false);
+  // --- ¡¡CORRECCIÓN!! ---
+  // Cambiamos '=== false' por '!== true' para incluir los 'null'
+  const estadosDeDestinoDisponibles = todosLosEstados.filter(e => e.es_estado_inicial !== true);
 
   // 2. Lista para "DESDE:"
   // IDs de los estados que ya son un destino en el circuito
@@ -121,14 +129,13 @@ const EditorFlujo = () => {
           <div>
             <label>Desde:</label>
             <select value={origenId} onChange={e => setOrigenId(e.target.value)}>
-              {/* Usamos la lista filtrada 'estadosDeOrigenDisponibles' */}
               {estadosDeOrigenDisponibles.map(e => <option key={e.id} value={e.id}>{e.nombreEstadoTramite}</option>)}
             </select>
           </div>
           <div>
             <label>Hacia:</label>
             <select value={siguienteId} onChange={e => setSiguienteId(e.target.value)}>
-              {/* Usamos la lista filtrada 'estadosDeDestinoDisponibles' */}
+              {/* Esta lista ahora usará el filtro corregido */}
               {estadosDeDestinoDisponibles.map(e => <option key={e.id} value={e.id}>{e.nombreEstadoTramite}</option>)}
             </select>
           </div>

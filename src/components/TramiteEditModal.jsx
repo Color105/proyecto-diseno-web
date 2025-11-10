@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-// ¡No importamos 'TramiteDashboard.css' aquí, ya está cargado en el Dashboard!
 
-// const API_BASE = 'http://localhost:3000'; // <-- 1. Eliminado
+// --- ¡ELIMINAMOS LA LISTA HARCODEADA! ---
+// const ALL_POSSIBLE_STATES = [ ... ]; // <-- ELIMINADA
 
-const ALL_POSSIBLE_STATES = [
-    'ingresado', 'asignado', 'en_proceso', 'suspendido', 'terminado', 'cancelado'
-];
-
-// --- 2. ACEPTAMOS 'token' Y 'apiUrl' COMO PROPS ---
 function TramiteEditModal({ tramite, onClose, onTramiteUpdated, token, apiUrl }) {
     
-    // El 'toString()' es importante por si el monto es 0 o null
     const [newMonto, setNewMonto] = useState((tramite.monto || 0).toString());
-    const [newState, setNewState] = useState(tramite.estado_tramite?.nombre || 'ingresado');
+    
+    // Usamos 'nombreEstadoTramite' (del dashboard)
+    const [newState, setNewState] = useState(tramite.estado_tramite?.nombreEstadoTramite || '');
     
     const [error, setError] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -22,26 +18,26 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated, token, apiUrl })
         
         const currentMonto = parseFloat(tramite.monto || 0);
         const submittedMonto = parseFloat(newMonto);
-
-        if (newState === (tramite.estado_tramite?.nombre) && submittedMonto === currentMonto) {
+        
+        // Usamos 'nombreEstadoTramite' para la comparación
+        if (newState === (tramite.estado_tramite?.nombreEstadoTramite) && submittedMonto === currentMonto) {
             setError("No hay cambios para guardar.");
             return;
         }
 
         setIsUpdating(true);
-        setError(null);
+setError(null);
         
         const payload = { 
             monto: submittedMonto,
-            new_state: newState 
+            new_state: newState // Enviamos el nombre del estado (ej: "En Proceso")
         };
 
-        // --- 3. USAMOS 'apiUrl' Y 'token' ---
         fetch(`${apiUrl}/tramites/${tramite.id}/update_estado`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // ¡Autenticación!
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(payload),
         })
@@ -49,20 +45,16 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated, token, apiUrl })
             setIsUpdating(false);
             if (!response.ok) {
                 return response.json().then(data => {
-                    // El error 401 es 'No autorizado'
-                    if (response.status === 401) throw new Error('Error de autenticación. Intenta iniciar sesión de nuevo.');
+                    if (response.status === 401) throw new Error('Error de autenticación.');
+                    // El error vendrá del backend (ej: "Transición no permitida: Ingresado -> Terminado")
                     throw new Error(data.error || data.details || 'Transición de estado inválida.');
                 });
             }
             return response.json();
         })
         .then(data => {
-            // alert(`Actualización exitosa: ${data.message || 'Datos guardados.'}`); // <-- 4. Eliminamos alert()
-            console.log("Trámite actualizado:", data);
-            
-            // Asumimos que 'data' es el trámite actualizado
+            // 'data' es el trámite actualizado, que ya incluye el nuevo 'posibles_siguientes_estados'
             onTramiteUpdated(data); 
-            
             onClose();
         })
         .catch(err => {
@@ -72,8 +64,23 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated, token, apiUrl })
         });
     };
 
+    // --- LÓGICA DEL DROPDOWN INTELIGENTE ---
+    // El backend ahora nos da la lista de estados válidos en 'tramite.posibles_siguientes_estados'
+    
+    // 1. Obtenemos los estados siguientes desde el trámite
+    const siguientesEstados = tramite.posibles_siguientes_estados || [];
+    
+    // 2. Nos aseguramos de que el estado actual (estado_tramite) esté en la lista
+    //    Esto es para que el usuario pueda cambiar SÓLO el monto sin cambiar el estado.
+    const estadoActual = tramite.estado_tramite;
+    let estadosParaDropdown = [...siguientesEstados];
+    
+    if (estadoActual && !siguientesEstados.find(e => e.id === estadoActual.id)) {
+      estadosParaDropdown.unshift(estadoActual); // Añade el estado actual al inicio
+    }
+    // --- FIN LÓGICA DROPDOWN ---
+
     return (
-        // Todos los 'className' ya coinciden con tu CSS
         <div className="modal-backdrop" onClick={onClose}> 
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <h3>Actualizar Trámite: {tramite.codigo || `TR-${tramite.id}`}</h3>
@@ -84,7 +91,8 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated, token, apiUrl })
                 </div>
                 
                 <div className="state-transition-section">
-                    <h4>Estado Actual: <span className={`status-${tramite.estado_tramite?.nombre || 'desconocido'}`}>{tramite.estado_tramite?.nombre || 'N/A'}</span></h4>
+                    {/* Usamos 'nombreEstadoTramite' */}
+                    <h4>Estado Actual: <span className={`status-${tramite.estado_tramite?.nombreEstadoTramite || 'desconocido'}`}>{tramite.estado_tramite?.nombreEstadoTramite || 'N/A'}</span></h4>
                     
                     <form onSubmit={handleUpdate} className="tramite-form">
                         {error && <div className="error-message">{error}</div>}
@@ -103,14 +111,23 @@ function TramiteEditModal({ tramite, onClose, onTramiteUpdated, token, apiUrl })
                         
                         <label>
                             Nuevo Estado:
+                            {/* --- CAMBIO GRANDE: EL DROPDOWN AHORA ES INTELIGENTE --- */}
                             <select
                                 value={newState}
                                 onChange={(e) => setNewState(e.target.value)}
                                 disabled={isUpdating}
                             >
-                                {ALL_POSSIBLE_STATES.map(state => (
-                                    <option key={state} value={state}>
-                                        {state.replace(/_/g, ' ')}
+                                {/* Si no hay estados (ej: un estado final), mostramos solo el actual */}
+                                {estadosParaDropdown.length === 0 && estadoActual && (
+                                     <option key={estadoActual.id} value={estadoActual.nombreEstadoTramite}>
+                                        {estadoActual.nombreEstadoTramite}
+                                    </option>
+                                )}
+                                
+                                {/* Mapeamos la lista filtrada que viene del backend */}
+                                {estadosParaDropdown.map(estado => (
+                                    <option key={estado.id} value={estado.nombreEstadoTramite}>
+                                        {estado.nombreEstadoTramite}
                                     </option>
                                 ))}
                             </select>

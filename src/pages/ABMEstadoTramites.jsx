@@ -1,4 +1,3 @@
-// src/pages/ABMEstadoTramites.jsx
 import React, { useState, useEffect } from 'react';
 import { 
   listEstados, 
@@ -26,14 +25,12 @@ export default function ABMEstadoTramites() {
   const loadEstados = async () => {
     setLoading(true);
     try {
-      // --- ¡¡CORRECCIÓN AQUÍ!! ---
-      // axios devuelve un objeto { data: [...] }, por eso extraemos 'response.data'
       const response = await listEstados();
       setEstados(response.data || []); 
-      // --- FIN DE LA CORRECCIÓN ---
     } catch (error) {
       console.error('Error al cargar estados de trámite:', error);
-      alert('Error al cargar estados de trámite: ' + (error.message || 'Error desconocido'));
+      // No uses alert() para errores de carga, es mejor un mensaje en la UI
+      // alert('Error al cargar estados de trámite: ' + (error.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }
@@ -42,19 +39,25 @@ export default function ABMEstadoTramites() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // El payload debe coincidir con los strong_params del controller
-      const payload = { estado_tramite: formData }; 
+      // --- ¡¡CORRECCIÓN!! ---
+      // NO envolvemos el payload aquí, porque 'adminApi.js' ya lo está haciendo.
+      // const payload = { estado_tramite: formData }; // <-- LÍNEA ORIGINAL INCORRECTA
 
       if (editingEstado) {
-        await updateEstado(editingEstado.id, payload);
+        // Asumimos que updateEstado también espera el wrapper, así que lo creamos para él
+        const updatePayload = { estado_tramite: formData };
+        await updateEstado(editingEstado.id, updatePayload);
       } else {
-        await createEstado(payload);
+        // Para create, enviamos el formData "desnudo".
+        // La función createEstado() en adminApi.js se encargará de envolverlo.
+        await createEstado(formData); // <-- LÍNEA CORREGIDA
       }
       loadEstados();
       resetForm();
     } catch (error) {
       console.error('Error al guardar estado de trámite:', error);
-      alert('Error al guardar estado de trámite: ' + (error.message || 'Verifique la conexión y los campos.'));
+      // Evita window.alert si es posible, usa un toast o un <p> de error
+      // alert('Error al guardar estado de trámite: ' + (error.message || 'Verifique la conexión y los campos.'));
     }
   };
 
@@ -68,13 +71,14 @@ export default function ABMEstadoTramites() {
   };
 
   const handleDelete = async (id) => {
+    // Es mejor usar un modal de confirmación personalizado en lugar de window.confirm
     if (!window.confirm('¿Está seguro de eliminar este estado de trámite?')) return;
     try {
       await deleteEstado(id);
       loadEstados();
     } catch (error) {
       console.error('Error al eliminar estado de trámite:', error);
-      alert('Error al eliminar: ' + (error.message || 'Asegúrese de que no tenga trámites o historiales asociados.'));
+      // alert('Error al eliminar: ' + (error.message || 'Asegúrese de que no tenga trámites o historiales asociados.'));
     }
   };
 

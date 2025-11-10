@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { API_URL } from '../config'; 
-// --- 1. IMPORTAR deleteTramite ---
 import { deleteTramite } from '../services/adminApi'; 
-
 import TramiteEditModal from './TramiteEditModal'; 
 import TramiteForm from './TramiteForm'; 
 import './TramiteDashboard.css'; 
@@ -15,8 +13,6 @@ function TramiteDashboard() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [selectedTramite, setSelectedTramite] = useState(null);
-    
-    // --- 2. AÑADIR ESTADO PARA EL MODAL DE BORRADO ---
     const [deletingId, setDeletingId] = useState(null);
     
     const { token, logout } = useAuth(); 
@@ -54,7 +50,6 @@ function TramiteDashboard() {
         fetchTramites();
     }, [token]); 
 
-    // --- 3. AÑADIR LÓGICA DE BORRADO ---
     const handleDeleteClick = (id) => {
         setDeletingId(id);
     };
@@ -62,15 +57,14 @@ function TramiteDashboard() {
     const executeDelete = async () => {
         if (!deletingId) return;
         try {
-            await deleteTramite(deletingId); // Llama a la API de Axios
+            await deleteTramite(deletingId);
             setDeletingId(null);
-            fetchTramites(); // Recarga la lista
+            fetchTramites(); 
         } catch (err) {
             setErrorMessage('Error al eliminar el trámite: ' + (err.response?.data?.error || err.message));
             setDeletingId(null);
         }
     };
-    // --- FIN LÓGICA DE BORRADO ---
 
     const handleTramiteUpdated = (updatedTramite) => {
         setTramites(prevTramites => 
@@ -121,6 +115,7 @@ function TramiteDashboard() {
                                 <tr>
                                     <th>CÓDIGO</th>
                                     <th>TIPO</th>
+                                    <th>CLIENTE</th> {/* <-- NUEVA COLUMNA */}
                                     <th>ESTADO</th>
                                     <th>CONSULTOR</th>
                                     <th>MONTO</th>
@@ -132,11 +127,13 @@ function TramiteDashboard() {
                                     const estadoNombre = tramite.estado_tramite?.nombreEstadoTramite || 'desconocido'; 
                                     const estadoCodigo = tramite.estado_tramite?.codEstadoTramite || 'desconocido';
                                     const consultorNombre = tramite.consultor?.nombre || 'Sin asignar';
+                                    const clienteNombre = tramite.cliente?.nombre_apellido_cliente || 'N/A'; // <-- NUEVA VARIABLE
 
                                     return (
                                         <tr key={tramite.id}>
                                             <td>{tramite.codigo || `TR-${tramite.id}`}</td>
                                             <td>{tramite.tipo_tramite?.nombre || 'N/A'}</td>
+                                            <td>{clienteNombre}</td> {/* <-- NUEVA CELDA */}
                                             <td>
                                                 <span className={`status-${estadoCodigo.toLowerCase()}`}>
                                                     {estadoNombre}
@@ -144,9 +141,7 @@ function TramiteDashboard() {
                                             </td>
                                             <td>{consultorNombre}</td>
                                             <td>${parseFloat(tramite.monto || 0).toFixed(2)}</td>
-                                            
-                                            {/* --- 4. AÑADIR BOTÓN DE ELIMINAR --- */}
-                                            <td className="acciones-tramites"> {/* Añadimos clase para espaciado */}
+                                            <td className="acciones-tramites">
                                                 <button className="btn-primary" onClick={() => openEditModal(tramite)}>Editar</button>
                                                 <button className="btn-danger-outline" onClick={() => handleDeleteClick(tramite.id)}>Eliminar</button>
                                             </td>
@@ -178,14 +173,12 @@ function TramiteDashboard() {
                 />
             )}
 
-            {/* --- 5. AÑADIR EL MODAL DE CONFIRMACIÓN --- */}
             {deletingId && (
                 <div className="modal-backdrop">
                     <div className="modal-content" style={{maxWidth: '400px'}}>
                         <h3 style={{marginTop: 0}}>Confirmar Eliminación</h3>
                         <p>¿Está seguro de eliminar el trámite {tramites.find(t => t.id === deletingId)?.codigo}? Esta acción no se puede deshacer.</p>
                         <div className="form-actions">
-                            {/* --- ¡¡CORRECCIÓN!! Se quitó el apóstrofe extra en type'="button" --- */}
                             <button type="button" onClick={executeDelete} className="btn-primary" style={{backgroundColor: '#b91c1c'}}>
                                 Sí, Eliminar
                             </button>
@@ -201,4 +194,3 @@ function TramiteDashboard() {
 }
 
 export default TramiteDashboard;
-
