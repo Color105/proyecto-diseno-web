@@ -85,6 +85,18 @@ export const deleteTipo = (id) =>
     headers: getAuthHeaders(),
   }).then(handle);
 
+/**
+ * NUEVO: asignar precio a un TipoTramite
+ * POST /tipo_tramites/:id/asignar_precio
+ * body: { precio_tipo_tramite: number }
+ */
+export const asignarPrecioTipoTramite = (id, precio) =>
+  fetch(`${API_URL}/tipo_tramites/${id}/asignar_precio`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ precio_tipo_tramite: precio }),
+  }).then(handle);
+
 /* =========================================================
    ESTADOS DE TRÁMITE (EstadoTramitesController)
    ========================================================= */
@@ -124,7 +136,6 @@ export const deleteTramite = (id) => {
 /* =========================================================
    CLIENTES (ClientesController)  [solo admin]
    ========================================================= */
-// ... (tu código de clientes va aquí, no lo repito para ahorrar espacio) ...
 export const buildClientePayload = (
   {
     nombre_apellido_cliente = "",
@@ -193,7 +204,6 @@ export const deleteCliente = (id) =>
 export const getVersionesPorTipo = (tipoTramiteId) =>
   api.get(`/tipo_tramites/${tipoTramiteId}/versiones`);
 
-// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
 // GET /versiones/:id
 export const getVersionDetalle = (versionId) =>
   api.get(`/versiones/${versionId}`);
@@ -202,17 +212,14 @@ export const getVersionDetalle = (versionId) =>
 export const createPrimeraVersion = (tipoTramiteId) =>
   api.post(`/tipo_tramites/${tipoTramiteId}/versiones`);
 
-// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
 // POST /versiones/:id/clonar
 export const clonarVersion = (versionId) =>
   api.post(`/versiones/${versionId}/clonar`);
 
-// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
 // POST /versiones/:id/activar
 export const activarVersion = (versionId) =>
   api.post(`/versiones/${versionId}/activar`);
 
-// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
 // DELETE /versiones/:id
 export const deleteVersionBorrador = (versionId) =>
   api.delete(`/versiones/${versionId}`);
@@ -222,7 +229,6 @@ export const deleteVersionBorrador = (versionId) =>
    (Usando Axios 'api' para código más limpio)
    ========================================================= */
 
-// --- ¡¡CORRECCIÓN!! 'versions' -> 'versiones' ---
 // POST /versiones/:versionId/transiciones
 export const addTransicion = (versionId, origenId, siguienteId) => {
   const body = {
