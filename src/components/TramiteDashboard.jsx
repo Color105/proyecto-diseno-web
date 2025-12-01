@@ -17,15 +17,18 @@ function TramiteDashboard() {
   const [selectedTramite, setSelectedTramite] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  // 👇 nuevo: filtro de vista
-  const [filtro, setFiltro] = useState('activos'); // 'activos' | 'eliminados' | 'todos'
+  // solo dos vistas
+  const [filtro, setFiltro] = useState('activos'); // 'activos' | 'eliminados'
 
   const { token, logout } = useAuth();
 
+  // ================== CARGA DE TRÁMITES ==================
   const fetchTramites = async (f = filtro) => {
     if (!token) return;
+
     setIsLoading(true);
     setErrorMessage(null);
+
     try {
       const response = await fetch(`${API_URL}/tramites?filtro=${f}`, {
         headers: {
@@ -38,8 +41,11 @@ function TramiteDashboard() {
         logout();
         throw new Error('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
       }
+
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: No se pudieron cargar los trámites.`);
+        throw new Error(
+          `Error ${response.status}: No se pudieron cargar los trámites.`
+        );
       }
 
       const data = await response.json();
@@ -58,15 +64,16 @@ function TramiteDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, filtro]);
 
-  // =============== BAJA LÓGICA ===============
+  // ================== BAJA LÓGICA ==================
   const handleDeleteClick = (id) => {
     setDeletingId(id);
   };
 
   const executeDelete = async () => {
     if (!deletingId) return;
+
     try {
-      // 👇 ahora el DELETE en el back hace dar_de_baja!
+      // DELETE en el back = baja lógica
       await deleteTramite(deletingId);
       setDeletingId(null);
       fetchTramites(filtro);
@@ -79,7 +86,7 @@ function TramiteDashboard() {
     }
   };
 
-  // =============== CREAR / EDITAR ===============
+  // ================== CREAR / EDITAR ==================
   const handleTramiteUpdated = (updatedTramite) => {
     setTramites((prevTramites) =>
       prevTramites.map((t) => (t.id === updatedTramite.id ? updatedTramite : t))
@@ -102,6 +109,7 @@ function TramiteDashboard() {
     setSelectedTramite(null);
   };
 
+  // ================== RENDER ==================
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -122,6 +130,7 @@ function TramiteDashboard() {
             >
               Activos
             </button>
+
             <button
               type="button"
               className="btn-secondary"
@@ -133,18 +142,6 @@ function TramiteDashboard() {
               }
             >
               Eliminados
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => setFiltro('todos')}
-              style={
-                filtro === 'todos'
-                  ? { backgroundColor: '#4f46e5', color: '#fff' }
-                  : {}
-              }
-            >
-              Todos
             </button>
           </div>
 
@@ -162,6 +159,7 @@ function TramiteDashboard() {
           Cargando trámites...
         </p>
       )}
+
       {errorMessage && <div className="error-message">{errorMessage}</div>}
 
       {!isLoading && !errorMessage && (
@@ -180,21 +178,23 @@ function TramiteDashboard() {
                   <th>ESTADO</th>
                   <th>CONSULTOR</th>
                   <th>PRECIO TIPO</th>
-                  <th>ACCIONES</th>
+                  {/* 👉 SOLO mostramos columna ACCIONES si NO es la vista Eliminados */}
+                  {filtro !== 'eliminados' && <th>ACCIONES</th>}
                 </tr>
               </thead>
               <tbody>
                 {tramites.map((tramite) => {
+                  // bandera de baja lógica (ajustá el nombre si tu API usa otro)
                   const esEliminado = !!tramite.dado_de_baja;
+
                   let estadoNombre =
                     tramite.estado_tramite?.nombreEstadoTramite || 'desconocido';
                   let estadoCodigo =
                     tramite.estado_tramite?.codEstadoTramite || 'desconocido';
 
-                  // Si está dado de baja, pisamos el estado para mostrar "Eliminado"
                   if (esEliminado) {
                     estadoNombre = 'Eliminado';
-                    estadoCodigo = 'ELIMINADO';
+                    estadoCodigo = 'eliminado'; // para .status-eliminado
                   }
 
                   const consultorNombre =
@@ -227,26 +227,24 @@ function TramiteDashboard() {
                           <span style={{ color: '#6b7280' }}>Sin precio</span>
                         )}
                       </td>
-                      <td className="acciones-tramites">
-                        <button
-                          className="btn-primary"
-                          onClick={() => openEditModal(tramite)}
-                          disabled={esEliminado}
-                          style={
-                            esEliminado
-                              ? { opacity: 0.5, cursor: 'not-allowed' }
-                              : {}
-                          }
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="btn-danger-outline"
-                          onClick={() => handleDeleteClick(tramite.id)}
-                        >
-                          {esEliminado ? 'Volver a dar de baja' : 'Dar de baja'}
-                        </button>
-                      </td>
+
+                      {/* 👉 En la vista Eliminados NO renderizamos la celda de acciones */}
+                      {filtro !== 'eliminados' && (
+                        <td className="acciones-tramites">
+                          <button
+                            className="btn-primary"
+                            onClick={() => openEditModal(tramite)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="btn-danger-outline"
+                            onClick={() => handleDeleteClick(tramite.id)}
+                          >
+                            Dar de baja
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -281,8 +279,8 @@ function TramiteDashboard() {
             <h3 style={{ marginTop: 0 }}>Confirmar baja</h3>
             <p>
               ¿Está seguro de dar de baja el trámite{' '}
-              {tramites.find((t) => t.id === deletingId)?.codigo}? Podrás verlo
-              luego usando el filtro <strong>“Eliminados”</strong>, pero ya no se
+              {tramites.find((t) => t.id === deletingId)?.codigo}? Luego lo
+              verás en la vista <strong>“Eliminados”</strong>, pero ya no se
               considerará activo.
             </p>
             <div className="form-actions">
