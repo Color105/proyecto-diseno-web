@@ -1,0 +1,72 @@
+.subirDoc-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.subirDoc-card {
+  background: #111827;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.subirDoc-subtitle {
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.subirDoc-form .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.subirDoc-form label span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.subirDoc-form input,
+.subirDoc-form select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.subirDoc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.subirDoc-table th,
+.subirDoc-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.hint {
+  color: #9ca3af;
+}
+
+.error-message {
+  background: #7f1d1d;
+  color: #fee2e2;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.success-message {
+  background: #064e3b;
+  color: #d1fae5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}

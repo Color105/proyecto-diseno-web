@@ -19,15 +19,27 @@ const ABMEstadoTramites  = lazy(() => import("./pages/ABMEstadoTramites.jsx"));
 const HistorialEstados   = lazy(() => import("./pages/HistorialEstados.jsx"));
 const TramiteDashboard   = lazy(() => import("./components/TramiteDashboard.jsx"));
 
-// --- ¡¡NUEVAS PÁGINAS A IMPORTAR!! ---
-const GestionVersiones = lazy(() => import("./pages/GestionVersiones.jsx"));
-const EditorFlujo      = lazy(() => import("./pages/EditorFlujo.jsx"));
+const GestionVersiones   = lazy(() => import("./pages/GestionVersiones.jsx"));
+const EditorFlujo        = lazy(() => import("./pages/EditorFlujo.jsx"));
 
-const NotFound = () => <div style={{ padding: 24 }}>404 — Página no encontrada</div>;
-const withSuspense = (el) => <Suspense fallback="Cargando…">{el}</Suspense>;
+// ⭐ NUEVA página: Subir Documentación
+const SubirDocumentacionPage = lazy(() =>
+  import("./pages/SubirDocumentacionPage.jsx")
+);
+
+const NotFound = () => (
+  <div style={{ padding: 24 }}>404 — Página no encontrada</div>
+);
+
+const withSuspense = (el) => (
+  <Suspense fallback="Cargando…">
+    {el}
+  </Suspense>
+);
 
 const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
+
   {
     path: "/",
     element: <DashboardLayout />,
@@ -44,7 +56,7 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Rutas Admin (protegidas)
+      // ====== Rutas Admin ======
       {
         path: "admin/clientes",
         element: (
@@ -69,27 +81,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      
-      // --- ¡¡NUEVA RUTA DE VERSIONES!! ---
-      {
-        path: "admin/tipos/:tipoTramiteId/versiones",
-        element: (
-          <ProtectedRoute roles={["admin"]}>
-            {withSuspense(<GestionVersiones />)}
-          </ProtectedRoute>
-        ),
-      },
-      // --- ¡¡NUEVA RUTA DEL EDITOR DE FLUJO!! ---
-      {
-        path: "admin/versiones/:versionId/editar",
-        element: (
-          <ProtectedRoute roles={["admin"]}>
-            {withSuspense(<EditorFlujo />)}
-          </ProtectedRoute>
-        ),
-      },
-      // --- FIN DE NUEVAS RUTAS ---
-
       {
         path: "admin/estados",
         element: (
@@ -98,6 +89,26 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
+      // Versiones de Tipo de Trámite
+      {
+        path: "admin/tipos/:tipoTramiteId/versiones",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<GestionVersiones />)}
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/versiones/:versionId/editar",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<EditorFlujo />)}
+          </ProtectedRoute>
+        ),
+      },
+
+      // Historial (si seguís usándolo)
       {
         path: "admin/historial",
         element: (
@@ -107,6 +118,17 @@ const router = createBrowserRouter([
         ),
       },
 
+      // ⭐ NUEVA RUTA: Subir Documentación
+      {
+        path: "admin/subir-documentacion",
+        element: (
+          <ProtectedRoute roles={["admin", "recepcionista"]}>
+            {withSuspense(<SubirDocumentacionPage />)}
+          </ProtectedRoute>
+        ),
+      },
+
+      // 404 dentro del layout
       { path: "*", element: <NotFound /> },
     ],
   },

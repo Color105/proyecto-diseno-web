@@ -1,0 +1,115 @@
+/* ===============================
+   SubirDocumentacionPage.css
+   =============================== */
+
+.subir-doc-wrapper {
+  max-width: 1100px;
+  margin: 0 auto 32px;
+}
+
+/* Bloques (cards) de la página */
+.subir-doc-section {
+  background: #020617;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.7);
+}
+
+.subir-doc-section h3 {
+  font-size: 1rem;
+  margin: 0 0 12px;
+  color: #e5e7eb;
+}
+
+/* Info del trámite seleccionado */
+.subir-doc-tramite-summary {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #020617;
+  border: 1px solid #1f2937;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.subir-doc-tramite-summary strong {
+  color: #e5e7eb;
+}
+
+/* Select de trámite */
+.subir-doc-select {
+  width: 100%;
+  max-width: 480px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+/* Mensajes */
+.subir-doc-alert {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.subir-doc-alert.error {
+  background: #450a0a;
+  color: #fecaca;
+  border: 1px solid #b91c1c;
+}
+
+.subir-doc-alert.success {
+  background: #064e3b;
+  color: #d1fae5;
+  border: 1px solid #10b981;
+}
+
+/* Tabla de documentos (usa la misma tabla general) */
+.subir-doc-table-wrapper {
+  margin-top: 8px;
+}
+
+/* Formulario de subida */
+.subir-doc-form {
+  max-width: 480px;
+}
+
+.subir-doc-form label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #d1d5db;
+}
+
+.subir-doc-form input[type="text"],
+.subir-doc-form input[type="file"] {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+/* Botón subir dentro del formulario */
+.subir-doc-form .form-actions {
+  margin-top: 12px;
+}
+
+/* Link "Ver archivo" en la tabla */
+.subir-doc-link {
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+.subir-doc-link:hover {
+  text-decoration: underline;
+}

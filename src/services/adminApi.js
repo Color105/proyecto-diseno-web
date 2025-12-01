@@ -16,7 +16,11 @@ const getAuthHeaders = () => {
 // -------- manejador de fetch ----------
 async function handle(res) {
   const tryJson = async () => {
-    try { return await res.json(); } catch { return null; }
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
   };
 
   if (!res.ok) {
@@ -26,7 +30,8 @@ async function handle(res) {
       window.location.reload();
     }
     const j = await tryJson();
-    const msg = j?.errors?.join(", ") || j?.error || `${res.status} ${res.statusText}`;
+    const msg =
+      j?.errors?.join(", ") || j?.error || `${res.status} ${res.statusText}`;
     throw new Error(msg);
   }
   if (res.status === 204) return { success: true };
@@ -100,17 +105,14 @@ export const asignarPrecioTipoTramite = (id, precio) =>
 /* =========================================================
    ESTADOS DE TRÁMITE (EstadoTramitesController)
    ========================================================= */
-export const listEstados = () =>
-  api.get("/estado_tramites");
+export const listEstados = () => api.get("/estado_tramites");
 
 export const createEstado = (p) =>
   api.post("/estado_tramites", { estado_tramite: p });
 
-export const updateEstado = (id, p) =>
-  api.patch(`/estado_tramites/${id}`, p);
+export const updateEstado = (id, p) => api.patch(`/estado_tramites/${id}`, p);
 
-export const deleteEstado = (id) =>
-  api.delete(`/estado_tramites/${id}`);
+export const deleteEstado = (id) => api.delete(`/estado_tramites/${id}`);
 
 /* =========================================================
    HISTORIAL POR TRÁMITE
@@ -194,10 +196,8 @@ export const deleteCliente = (id) =>
     headers: getAuthHeaders(),
   }).then(handle);
 
-
 /* =========================================================
-   == NUEVO: VERSIONADO (VersionsController) ==
-   (Usando Axios 'api' para código más limpio)
+   VERSIONADO (VersionsController)
    ========================================================= */
 
 // GET /tipo_tramites/:tipoTramiteId/versiones
@@ -225,8 +225,7 @@ export const deleteVersionBorrador = (versionId) =>
   api.delete(`/versiones/${versionId}`);
 
 /* =========================================================
-   == NUEVO: TRANSICIONES (TransicionPosiblesController) ==
-   (Usando Axios 'api' para código más limpio)
+   TRANSICIONES (TransicionPosiblesController)
    ========================================================= */
 
 // POST /versiones/:versionId/transiciones
@@ -243,3 +242,65 @@ export const addTransicion = (versionId, origenId, siguienteId) => {
 // DELETE /transiciones/:transicionId
 export const deleteTransicion = (transicionId) =>
   api.delete(`/transiciones/${transicionId}`);
+
+/* =========================================================
+   DOCUMENTACIONES (catálogo)
+   ========================================================= */
+
+// Asume que tenés resources :documentaciones en Rails
+export const listDocumentaciones = () => api.get("/documentaciones");
+
+/* =========================================================
+   NUEVO: DOCUMENTOS DE TRÁMITE
+   (TramiteDocumentacionController + ActiveStorage)
+   ========================================================= */
+
+/**
+ * Listar documentos de un trámite
+ * GET /tramites/:tramiteId/documentos
+ */
+export const listDocumentosTramite = (tramiteId) =>
+  fetch(`${API_URL}/tramites/${tramiteId}/documentos`, {
+    headers: getAuthHeaders(),
+  }).then(handle);
+
+/**
+ * Subir documento a un trámite
+ * POST /tramites/:tramiteId/documentos
+ * body: FormData con:
+ *   tramite_documentacion[documentacion_id]
+ *   tramite_documentacion[archivo]
+ */
+// src/services/adminApi.js (parte relevante)
+export const uploadDocumentoTramite = (tramiteId, { file, documentacion_id = null }) => {
+  const token = localStorage.getItem("token");
+  const formData = new FormData();
+
+  if (documentacion_id) {
+    formData.append("tramite_documentacion[documentacion_id]", documentacion_id);
+  }
+  if (file) {
+    formData.append("tramite_documentacion[archivo]", file);
+  }
+
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`; // sin Content-Type
+
+  return fetch(`${API_URL}/tramites/${tramiteId}/documentos`, {
+    method: "POST",
+    headers,
+    body: formData,
+  }).then(handle);
+};
+
+
+
+/**
+ * Eliminar un documento de un trámite
+ * DELETE /tramites/:tramiteId/documentos/:id
+ */
+export const deleteDocumentoTramite = (tramiteId, documentoId) =>
+  fetch(`${API_URL}/tramites/${tramiteId}/documentos/${documentoId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  }).then(handle);
