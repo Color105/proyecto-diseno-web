@@ -6,7 +6,7 @@ import {
   createTipo,
   updateTipo,
   deleteTipo,
-  asignarPrecioTipoTramite,   // 👈 NUEVO
+  asignarPrecioTipoTramite,
 } from '../services/adminApi';
 import '../components/TramiteDashboard.css';
 
@@ -23,7 +23,7 @@ export default function ABMTipos() {
   const [error, setError] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
-  // 👉 estado para el modal de precio
+  // Estado para modal de precio
   const [showPrecioModal, setShowPrecioModal] = useState(false);
   const [tipoPrecioSeleccionado, setTipoPrecioSeleccionado] = useState(null);
   const [precioValor, setPrecioValor] = useState('');
@@ -40,10 +40,10 @@ export default function ABMTipos() {
     setLoading(true);
     setError(null);
     try {
-      const data = await listTipos(); // el back ya devuelve precio_actual
+      const data = await listTipos();
       setTipos(data);
     } catch (error) {
-      console.error("Error al cargar tipos:", error);
+      console.error('Error al cargar tipos:', error);
       setError('Error al cargar tipos: ' + error.message);
     } finally {
       setLoading(false);
@@ -53,21 +53,27 @@ export default function ABMTipos() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
     try {
-      const payload = {
-        nombre: formData.nombre,
-        plazo_documentacion: parseInt(formData.plazo_documentacion, 10)
-      };
+      let payload;
 
       if (editingTipo) {
+        // En edición solo permitimos cambiar el nombre
+        payload = { nombre: formData.nombre };
         await updateTipo(editingTipo.id, payload);
       } else {
+        // En alta se define también el plazo de documentación
+        payload = {
+          nombre: formData.nombre,
+          plazo_documentacion: parseInt(formData.plazo_documentacion, 10),
+        };
         await createTipo(payload);
       }
-      loadTipos();
+
+      await loadTipos();
       resetForm();
     } catch (error) {
-      console.error("Error al guardar tipo:", error);
+      console.error('Error al guardar tipo:', error);
       setError('Error al guardar tipo: ' + error.message);
     }
   };
@@ -76,7 +82,7 @@ export default function ABMTipos() {
     setEditingTipo(tipo);
     setFormData({
       nombre: tipo.nombre,
-      plazo_documentacion: tipo.plazo_documentacion.toString()
+      plazo_documentacion: tipo.plazo_documentacion.toString(),
     });
     setShowForm(true);
     setError(null);
@@ -85,16 +91,16 @@ export default function ABMTipos() {
   const handleDelete = (id) => {
     setConfirmDeleteId(id);
   };
-  
+
   const executeDelete = async () => {
     if (!confirmDeleteId) return;
     setError(null);
     try {
       await deleteTipo(confirmDeleteId);
       setConfirmDeleteId(null);
-      loadTipos();
+      await loadTipos();
     } catch (error) {
-      console.error("Error al eliminar tipo:", error);
+      console.error('Error al eliminar tipo:', error);
       setError('Error al eliminar tipo: ' + error.message);
     }
   };
@@ -105,7 +111,7 @@ export default function ABMTipos() {
     setShowForm(false);
     setError(null);
   };
-  
+
   const handleOpenForm = () => {
     resetForm();
     setShowForm(true);
@@ -147,7 +153,6 @@ export default function ABMTipos() {
       setPrecioLoading(true);
       await asignarPrecioTipoTramite(tipoPrecioSeleccionado.id, valor);
 
-      // Actualizamos la lista local con el nuevo precio
       setTipos((prev) =>
         prev.map((t) =>
           t.id === tipoPrecioSeleccionado.id
@@ -175,12 +180,19 @@ export default function ABMTipos() {
       </div>
 
       {loading && <p>Cargando...</p>}
-      {error && <div className="error-message" style={{ marginBottom: '20px' }}>{error}</div>}
+      {error && (
+        <div className="error-message" style={{ marginBottom: '20px' }}>
+          {error}
+        </div>
+      )}
 
       {/* Modal alta/edición tipo */}
       {showForm && (
         <div className="modal-backdrop" onMouseDown={resetForm}>
-          <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <h3>{editingTipo ? 'Editar Tipo' : 'Nuevo Tipo'}</h3>
             <form onSubmit={handleSubmit} className="tramite-form">
               <label>
@@ -188,25 +200,52 @@ export default function ABMTipos() {
                 <input
                   type="text"
                   value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nombre: e.target.value })
+                  }
                   required
                 />
               </label>
+
               <label>
                 Plazo de Documentación (días):
                 <input
                   type="number"
                   value={formData.plazo_documentacion}
-                  onChange={(e) => setFormData({ ...formData, plazo_documentacion: e.target.value })}
-                  required
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      plazo_documentacion: e.target.value,
+                    })
+                  }
+                  required={!editingTipo}  // solo requerido en alta
                   min="0"
+                  disabled={!!editingTipo} // deshabilitado en edición
+                  readOnly={!!editingTipo}
                 />
               </label>
+              {editingTipo && (
+                <p
+                  style={{
+                    fontSize: '0.8rem',
+                    color: '#9ca3af',
+                    marginTop: 4,
+                  }}
+                >
+                  El plazo de documentación no se puede modificar una vez creado
+                  el tipo.
+                </p>
+              )}
+
               <div className="form-actions">
                 <button type="submit" className="btn-primary">
                   {editingTipo ? 'Actualizar' : 'Crear'}
                 </button>
-                <button type="button" onClick={resetForm} className="btn-secondary">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="btn-secondary"
+                >
                   Cancelar
                 </button>
               </div>
@@ -220,7 +259,10 @@ export default function ABMTipos() {
         <div className="modal-backdrop">
           <div className="modal-content" style={{ maxWidth: '400px' }}>
             <h3 style={{ marginTop: 0 }}>Confirmar Eliminación</h3>
-            <p>¿Está seguro de eliminar este tipo de trámite? Esta acción no se puede deshacer.</p>
+            <p>
+              ¿Está seguro de eliminar este tipo de trámite? Esta acción no se
+              puede deshacer.
+            </p>
             <div className="form-actions">
               <button
                 type="button"
@@ -245,7 +287,10 @@ export default function ABMTipos() {
       {/* Modal precio */}
       {showPrecioModal && tipoPrecioSeleccionado && (
         <div className="modal-backdrop" onMouseDown={cerrarModalPrecio}>
-          <div className="modal-content" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            className="modal-content"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <h3>Asignar precio</h3>
             <p style={{ marginBottom: '10px' }}>
               Tipo: <strong>{tipoPrecioSeleccionado.nombre}</strong>
@@ -264,7 +309,10 @@ export default function ABMTipos() {
               </label>
 
               {precioError && (
-                <div className="error-message" style={{ marginBottom: '10px' }}>
+                <div
+                  className="error-message"
+                  style={{ marginBottom: '10px' }}
+                >
                   {precioError}
                 </div>
               )}
@@ -296,55 +344,61 @@ export default function ABMTipos() {
             <tr>
               <th>Nombre</th>
               <th>Plazo de Documentación</th>
-              <th>Precio actual</th> {/* 👈 NUEVA COLUMNA */}
+              <th>Precio actual</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {!loading && tipos.map((tipo) => (
-              <tr key={tipo.id}>
-                <td>{tipo.nombre}</td>
-                <td>{tipo.plazo_documentacion} días</td>
-                <td>
-                  {tipo.precio_actual != null
-                    ? `AR$ ${tipo.precio_actual}`
-                    : <span style={{ color: '#6b7280' }}>Sin precio</span>}
-                </td>
-                <td>
-                  <button
-                    onClick={() => handleEdit(tipo)}
-                    className="btn-secondary"
-                    style={{ marginRight: '10px' }}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(tipo.id)}
-                    className="btn-secondary"
-                    style={{ backgroundColor: '#b91c1c', marginRight: '10px' }}
-                  >
-                    Eliminar
-                  </button>
+            {!loading &&
+              tipos.map((tipo) => (
+                <tr key={tipo.id}>
+                  <td>{tipo.nombre}</td>
+                  <td>{tipo.plazo_documentacion} días</td>
+                  <td>
+                    {tipo.precio_actual != null ? (
+                      `AR$ ${tipo.precio_actual}`
+                    ) : (
+                      <span style={{ color: '#6b7280' }}>Sin precio</span>
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => handleEdit(tipo)}
+                      className="btn-secondary"
+                      style={{ marginRight: '10px' }}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(tipo.id)}
+                      className="btn-secondary"
+                      style={{
+                        backgroundColor: '#b91c1c',
+                        marginRight: '10px',
+                      }}
+                    >
+                      Eliminar
+                    </button>
 
-                  <button
-                    onClick={() => abrirModalPrecio(tipo)}
-                    className="btn-secondary"
-                    style={{ marginRight: '10px' }}
-                    title="Asignar / modificar precio"
-                  >
-                    Precio 💲
-                  </button>
+                    <button
+                      onClick={() => abrirModalPrecio(tipo)}
+                      className="btn-secondary"
+                      style={{ marginRight: '10px' }}
+                      title="Asignar / modificar precio"
+                    >
+                      Precio 💲
+                    </button>
 
-                  <button
-                    onClick={() => handleGestionarVersiones(tipo.id)}
-                    className="btn-secondary"
-                    title="Gestionar Versiones"
-                  >
-                    Versiones 📜
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    <button
+                      onClick={() => handleGestionarVersiones(tipo.id)}
+                      className="btn-secondary"
+                      title="Gestionar Versiones"
+                    >
+                      Versiones 📜
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

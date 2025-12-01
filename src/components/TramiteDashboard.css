@@ -1,206 +1,295 @@
-/* --- CSS DE TU TEMA --- */
-/* (Copiado de tu versión anterior, limpiando duplicados) */
+/* --- THEME BASE --- */
 
 #root {
-    width: 100vw; 
-    min-height: 100vh; 
-    display: flex;
-    justify-content: center; 
-    align-items: flex-start; /* Alinea arriba, no al centro */
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinea arriba, no al centro */
 }
 
 body {
-    background-color: #121212; 
-    color: #f0f0f0; 
-    font-family: 'Inter', 'Arial', sans-serif; 
-    margin: 0;
-    padding: 0;
+  background-color: #121212;
+  color: #f0f0f0;
+  font-family: 'Inter', 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
+/* --- CONTENEDOR PRINCIPAL --- */
+
 .dashboard-container {
-    width: 100%; /* Ocupa el ancho disponible */
-    max-width: 1400px; 
-    margin: 40px 20px; /* Margen vertical y horizontal */
-    padding: 30px; 
-    background-color: #1e1e1e; 
-    border-radius: 16px; 
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8); 
-    border: 1px solid #333333; 
+  width: 100%; /* Ocupa el ancho disponible */
+  max-width: 1400px;
+  margin: 40px 20px;
+  padding: 30px;
+  background-color: #1e1e1e;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  border: 1px solid #333333;
 }
 
 .dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #333; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #333;
 }
 
 .dashboard-header h1 {
-    font-size: 2.2em; /* Ajustado */
-    font-weight: 700; 
-    color: #ffffff;
-    letter-spacing: -0.5px;
+  font-size: 2.2em;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5px;
 }
 
+/* --- TABLA DE TRÁMITES --- */
+
 .table-wrapper {
-    overflow-x: auto;
-    border-radius: 8px; 
+  overflow-x: auto;
+  border-radius: 8px;
 }
 
 .tramites-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 1em; /* Ajustado */
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1em;
 }
 
 .tramites-table th {
-    background-color: #272727; 
-    color: #999999; 
-    font-weight: 500;
-    padding: 16px 20px;
-    text-align: left;
-    text-transform: uppercase;
-    font-size: 0.9em;
-    border-bottom: 2px solid #3a3a3a; 
+  background-color: #272727;
+  color: #999999;
+  font-weight: 500;
+  padding: 16px 20px;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 0.9em;
+  border-bottom: 2px solid #3a3a3a;
 }
 
 .tramites-table td {
-    padding: 15px 20px; 
-    border-bottom: 1px solid #2a2a2a; 
-    color: #f0f0f0;
+  padding: 15px 20px;
+  border-bottom: 1px solid #2a2a2a;
+  color: #f0f0f0;
 }
 
 .tramites-table tbody tr:hover {
-    background-color: #252525; 
+  background-color: #252525;
 }
 
-/* --- Estados --- */
-.status-ingresado, .status-asignado, .status-en_proceso, .status-terminado, .status-cancelado, .status-suspendido, .status-desconocido {
-    padding: 4px 10px;
-    border-radius: 20px; 
-    font-size: 0.85em;
-    font-weight: 700; 
-    text-transform: uppercase;
-    display: inline-block; 
-}
-.status-ingresado { background-color: #3f51b5; color: #ffffff; } 
-.status-asignado { background-color: #ff9800; color: #333333; } 
-.status-en_proceso { background-color: #4caf50; color: #ffffff; } 
-.status-terminado { background-color: #607d8b; color: #ffffff; } 
-.status-cancelado { background-color: #f44336; color: #ffffff; } 
-.status-suspendido { background-color: #9c27b0; color: #ffffff; }
-.status-desconocido { background-color: #444; color: #ccc; }
+/* --- ESTADOS (PÍLDORAS) --- */
 
+.status-ingresado,
+.status-asignado,
+.status-en_proceso,
+.status-terminado,
+.status-cancelado,
+.status-suspendido,
+.status-desconocido,
+.status-eliminado {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+}
 
-/* --- Botones --- */
-.btn-primary, .btn-secondary {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px; 
-    cursor: pointer;
-    font-weight: 700;
-    transition: all 0.2s;
-    font-size: 1em; 
+.status-ingresado {
+  background-color: #3f51b5;
+  color: #ffffff;
 }
-.btn-primary {
-    background-color: #007bff; 
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4); 
+.status-asignado {
+  background-color: #ff9800;
+  color: #333333;
 }
-.btn-primary:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px); 
+.status-en_proceso {
+  background-color: #4caf50;
+  color: #ffffff;
 }
+.status-terminado {
+  background-color: #607d8b;
+  color: #ffffff;
+}
+.status-cancelado {
+  background-color: #f44336;
+  color: #ffffff;
+}
+.status-suspendido {
+  background-color: #9c27b0;
+  color: #ffffff;
+}
+.status-desconocido {
+  background-color: #444;
+  color: #ccc;
+}
+
+/* Estado “Eliminado” (baja lógica) */
+.status-eliminado {
+  background-color: #4b5563;
+  color: #e5e7eb;
+}
+
+/* Fila de trámite dado de baja (baja lógica) */
+.tramite-eliminado {
+  opacity: 0.6;
+  background-color: #020617; /* Un toque más oscuro */
+}
+
+/* --- BOTONES --- */
+
+.btn-primary,
 .btn-secondary {
-    background-color: #444444; 
-    color: #f0f0f0;
-    margin-left: 15px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+  font-size: 1em;
 }
-.btn-secondary:hover { background-color: #555555; }
 
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #444444;
+  color: #f0f0f0;
+  margin-left: 15px;
+}
+
+.btn-secondary:hover {
+  background-color: #555555;
+}
+
+/* Botón de peligro "outline" (para Dar de baja) */
+
+.btn-danger-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background-color: transparent;
+  color: #fca5a5;
+  border: 1px solid #dc2626;
+  transition: all 0.2s ease;
+}
+
+.btn-danger-outline:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #ef4444;
+}
+
+/* Asegurarnos que el btn-primary de la tabla sea pequeño */
+.tramites-table .btn-primary {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Celda de acciones (espaciado entre botones) */
+.acciones-tramites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 /* --- MODAL Y FORMULARIO --- */
+
 .modal-backdrop {
-    position: fixed; 
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); 
-    display: flex;
-    justify-content: center; 
-    align-items: center; 
-    z-index: 1000; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 .modal-content {
-    background-color: #272727; 
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95);
-    min-width: 450px;
-    max-width: 700px;
-    z-index: 1001;
+  background-color: #272727;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95);
+  min-width: 450px;
+  max-width: 700px;
+  z-index: 1001;
 }
 
 .tramite-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding: 0; 
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 0;
 }
 
 .tramite-form h3 {
-    color: #ffffff;
-    font-weight: 500;
-    margin-top: 0;
+  color: #ffffff;
+  font-weight: 500;
+  margin-top: 0;
 }
 
 .tramite-form label {
-    display: flex;
-    flex-direction: column;
-    font-size: 1.05em;
-    color: #cccccc; 
+  display: flex;
+  flex-direction: column;
+  font-size: 1.05em;
+  color: #cccccc;
 }
 
-.tramite-form input[type="text"], 
-.tramite-form input[type="number"], 
+.tramite-form input[type='text'],
+.tramite-form input[type='number'],
 .tramite-form select {
-    padding: 10px;
-    font-size: 1em; 
-    border: 1px solid #444;
-    background-color: #3a3a3a; 
-    color: #ffffff;
-    border-radius: 6px;
-    margin-top: 5px; 
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #444;
+  background-color: #3a3a3a;
+  color: #ffffff;
+  border-radius: 6px;
+  margin-top: 5px;
 }
 
 .form-actions {
-    margin-top: 30px;
-    display: flex;
-    justify-content: center; 
-    gap: 20px;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 
-/* --- Clase de Error (Necesaria) --- */
+/* --- MENSAJE DE ERROR --- */
+
 .error-message {
-    padding: 15px;
-    margin: 20px 0;
-    background-color: #f44336; /* Rojo de tu paleta */
-    color: #ffffff;
-    border: 1px solid #f44336;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: 500;
+  padding: 15px;
+  margin: 20px 0;
+  background-color: #f44336;
+  color: #ffffff;
+  border: 1px solid #f44336;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
 }
 
 /* =========================================================
    ESTILOS PARA GestionVersiones.jsx
    ========================================================= */
 
-/* Contenedor principal (reusa dashboard-container) */
 .versiones-container {
   padding: 2rem;
   max-width: 1200px;
@@ -229,7 +318,7 @@ body {
   background-color: rgba(163, 180, 200, 0.15);
 }
 
-/* Títulos (reusa el estilo del header) */
+/* Títulos */
 .versiones-container h1,
 .editor-container h1 {
   font-size: 2rem;
@@ -241,7 +330,8 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
-/* Estilos para las "píldoras" de estado */
+/* Píldoras de estado de versión */
+
 .estado-activo,
 .estado-borrador,
 .estado-archivado,
@@ -267,13 +357,11 @@ body {
   color: #71717a;
 }
 
-/* Para que los botones de acción no se peguen */
 td.acciones-versiones {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-
 
 /* =========================================================
    ESTILOS PARA EditorFlujo.jsx
@@ -301,12 +389,14 @@ td.acciones-versiones {
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color);
 }
+
 .editor-container h3 {
   border-bottom: none;
   margin-top: 0;
 }
 
 /* Formulario para añadir transición */
+
 .form-transicion {
   display: flex;
   flex-wrap: wrap;
@@ -326,7 +416,6 @@ td.acciones-versiones {
   color: var(--text-secondary);
 }
 
-/* Reusamos el estilo de input para los selects */
 .form-transicion select {
   width: 250px;
   padding: 0.75rem 1rem;
@@ -344,7 +433,8 @@ td.acciones-versiones {
   box-shadow: 0 0 0 1px var(--accent-color);
 }
 
-/* El botón de añadir */
+/* Botón de añadir transición */
+
 .form-transicion button {
   background-color: var(--accent-color);
   color: white;
@@ -356,12 +446,12 @@ td.acciones-versiones {
   font-weight: 500;
   transition: all 0.2s ease;
 }
+
 .form-transicion button:hover {
   filter: brightness(110%);
 }
 
-
-/* --- Área del "Diagrama" --- */
+/* Área “diagrama” */
 
 .circuito-diagrama {
   display: grid;
@@ -369,7 +459,8 @@ td.acciones-versiones {
   gap: 1.5rem;
 }
 
-/* "Nodo" o tarjeta para cada estado de origen */
+/* Nodo de origen */
+
 .nodo-origen {
   background-color: var(--surface-dark);
   border: 1px solid var(--border-color);
@@ -384,6 +475,7 @@ td.acciones-versiones {
   margin-top: 0;
   margin-bottom: 1rem;
 }
+
 .nodo-origen h4 strong {
   color: var(--accent-color);
 }
@@ -402,11 +494,13 @@ td.acciones-versiones {
   border-bottom: 1px solid var(--border-color);
   font-size: 0.95rem;
 }
+
 .nodo-origen li:last-child {
   border-bottom: none;
 }
 
 /* Botón [X] para eliminar transición */
+
 .delete-transicion {
   background-color: transparent;
   border: 1px solid #dc2626;
@@ -421,45 +515,8 @@ td.acciones-versiones {
   padding: 0;
   transition: all 0.2s ease;
 }
+
 .delete-transicion:hover {
   background-color: #dc2626;
   color: white;
-}
-/* src/components/TramiteDashboard.css */
-
-/* ... (todos tus estilos existentes) ... */
-
-/* Espaciado para la celda de acciones en la tabla de trámites */
-.acciones-tramites {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem; /* Espacio entre botones */
-}
-
-/* Botón de peligro "outline" (reusado de GestionVersiones) */
-.btn-danger-outline {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-  background-color: transparent;
-  color: #fca5a5;
-  border: 1px solid #dc2626;
-  transition: all 0.2s ease;
-}
-.btn-danger-outline:hover {
-  background-color: rgba(220, 38, 38, 0.1);
-  color: #ef4444;
-}
-
-/* Asegurarnos que el btn-primary de la tabla sea pequeño */
-.tramites-table .btn-primary {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
 }
