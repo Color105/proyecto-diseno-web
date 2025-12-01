@@ -41,8 +41,8 @@ function validarCuit(cuit) {
   if (!digits) return "El CUIT es obligatorio.";
   if (digits.length !== 11) return "El CUIT debe tener 11 dígitos.";
 
-  const pesos = [5,4,3,2,7,6,5,4,3,2];
-  const nums = digits.split("").map(d => parseInt(d, 10));
+  const pesos = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  const nums = digits.split("").map((d) => parseInt(d, 10));
 
   let suma = 0;
   for (let i = 0; i < 10; i++) {
@@ -130,7 +130,8 @@ export default function ABMClientes() {
   const [perfil, setPerfil] = useState(emptyPerfil);
   const [login, setLogin] = useState(emptyLogin);
   const [search, setSearch] = useState("");
-  const [errors, setErrors] = useState({}); // 👈 nuevo estado de errores
+  const [errors, setErrors] = useState({});
+  const [deleteMessage, setDeleteMessage] = useState(""); // 👈 mensaje global para borrar
 
   useEffect(() => {
     fetchClientes();
@@ -170,9 +171,23 @@ export default function ABMClientes() {
 
   async function handleDelete(id) {
     if (!window.confirm("¿Eliminar este cliente definitivamente?")) return;
-    await deleteCliente(id);
-    await fetchClientes();
-    if (perfil.id === id) resetForm();
+
+    try {
+      setLoading(true);
+      setDeleteMessage(""); // limpiamos mensaje previo
+
+      await deleteCliente(id); // lanza Error si el backend responde 4xx/5xx
+
+      await fetchClientes();
+      if (perfil.id === id) resetForm();
+    } catch (err) {
+      console.error("Error al eliminar cliente:", err);
+      const apiMessage = err?.message || "No se pudo eliminar el cliente.";
+      setDeleteMessage(apiMessage);
+      alert(apiMessage);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleSubmit(e) {
@@ -188,7 +203,9 @@ export default function ABMClientes() {
     }
 
     setErrors({});
+    setDeleteMessage("");
     setLoading(true);
+
     try {
       if (mode === "create") {
         const payload = {
@@ -230,9 +247,9 @@ export default function ABMClientes() {
 
   // helpers para onChange con validación inmediata por campo
   const updatePerfilField = (field, value) => {
-    setPerfil(prev => ({ ...prev, [field]: value }));
+    setPerfil((prev) => ({ ...prev, [field]: value }));
 
-    setErrors(prev => {
+    setErrors((prev) => {
       const newErrors = { ...prev };
       let msg = "";
 
@@ -250,9 +267,9 @@ export default function ABMClientes() {
   };
 
   const updateLoginField = (field, value) => {
-    setLogin(prev => ({ ...prev, [field]: value }));
+    setLogin((prev) => ({ ...prev, [field]: value }));
 
-    setErrors(prev => {
+    setErrors((prev) => {
       const newErrors = { ...prev };
       let msg = "";
 
@@ -474,6 +491,13 @@ export default function ABMClientes() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+
+        {/* Mensaje de error al eliminar */}
+        {deleteMessage && (
+          <div className="alert error">
+            {deleteMessage}
+          </div>
+        )}
 
         {loading ? (
           <p>Cargando...</p>

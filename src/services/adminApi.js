@@ -271,7 +271,6 @@ export const listDocumentosTramite = (tramiteId) =>
  *   tramite_documentacion[documentacion_id]
  *   tramite_documentacion[archivo]
  */
-// src/services/adminApi.js (parte relevante)
 export const uploadDocumentoTramite = (tramiteId, { file, documentacion_id = null }) => {
   const token = localStorage.getItem("token");
   const formData = new FormData();
@@ -292,8 +291,6 @@ export const uploadDocumentoTramite = (tramiteId, { file, documentacion_id = nul
     body: formData,
   }).then(handle);
 };
-
-
 
 /**
  * Eliminar un documento de un trámite
