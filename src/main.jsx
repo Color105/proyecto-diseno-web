@@ -27,6 +27,11 @@ const SubirDocumentacionPage = lazy(() =>
   import("./pages/SubirDocumentacionPage.jsx")
 );
 
+// ⭐ NUEVA página: Listas de Precios
+const ListaPreciosPage = lazy(() =>
+  import("./pages/ListaPreciosPage.jsx")   // guarda que esta ruta coincida con dónde guardaste el JSX
+);
+
 const NotFound = () => (
   <div style={{ padding: 24 }}>404 — Página no encontrada</div>
 );
@@ -108,7 +113,7 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Historial (si seguís usándolo)
+      // Historial
       {
         path: "admin/historial",
         element: (
@@ -124,6 +129,16 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={["admin", "recepcionista"]}>
             {withSuspense(<SubirDocumentacionPage />)}
+          </ProtectedRoute>
+        ),
+      },
+
+      // ⭐ NUEVA RUTA: Listas de Precios
+      {
+        path: "admin/listas-precios",
+        element: (
+          <ProtectedRoute roles={["admin"]}>
+            {withSuspense(<ListaPreciosPage />)}
           </ProtectedRoute>
         ),
       },

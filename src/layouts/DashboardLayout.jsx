@@ -41,6 +41,13 @@ const IconUpload = () => (
   </svg>
 );
 
+// ⭐ Nuevo icono para Listas de Precios
+const IconPriceList = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M7 3h10a2 2 0 0 1 2 2v14l-4-3-4 3-4-3-4 3V5a2 2 0 0 1 2-2h2zm3 4v2h2a2 2 0 0 1 0 4h-1v1h-2v-2h3a1 1 0 0 0 0-2h-2a2 2 0 0 1 0-4h1V7h2v2h-3a1 1 0 0 0 0 2h2V9h-2z" />
+  </svg>
+);
+
 // Link Sidebar
 function SidebarLink({ to, icon, label, ...props }) {
   return (
@@ -108,7 +115,14 @@ function Sidebar() {
                 label="Consultores"
                 icon={<IconUsers />}
               />
-              {/* ⭐ Enlace a la página nueva */}
+
+              {/* ⭐ Nueva sección: Listas de Precios */}
+              <SidebarLink
+                to="/admin/listas-precios"
+                label="Listas de Precios"
+                icon={<IconPriceList />}
+              />
+
               <SidebarLink
                 to="/admin/subir-documentacion"
                 label="Subir Documentación"

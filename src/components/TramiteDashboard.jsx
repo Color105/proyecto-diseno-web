@@ -177,14 +177,14 @@ function TramiteDashboard() {
                   <th>CLIENTE</th>
                   <th>ESTADO</th>
                   <th>CONSULTOR</th>
-                  <th>PRECIO TIPO</th>
+                  {/* 👇 ahora mostramos el MONTO del trámite (precio histórico) */}
+                  <th>MONTO COBRADO</th>
                   {/* 👉 SOLO mostramos columna ACCIONES si NO es la vista Eliminados */}
                   {filtro !== 'eliminados' && <th>ACCIONES</th>}
                 </tr>
               </thead>
               <tbody>
                 {tramites.map((tramite) => {
-                  // bandera de baja lógica (ajustá el nombre si tu API usa otro)
                   const esEliminado = !!tramite.dado_de_baja;
 
                   let estadoNombre =
@@ -202,7 +202,8 @@ function TramiteDashboard() {
                   const clienteNombre =
                     tramite.cliente?.nombre_apellido_cliente || 'N/A';
 
-                  const precioTipo = tramite.tipo_tramite?.precio_actual;
+                  // 👇 este es el campo que viene de la BD y NO debe cambiar
+                  const monto = tramite.monto;
 
                   return (
                     <tr
@@ -221,14 +222,13 @@ function TramiteDashboard() {
                       </td>
                       <td>{consultorNombre}</td>
                       <td>
-                        {precioTipo != null ? (
-                          `$${parseFloat(precioTipo).toFixed(2)}`
+                        {monto != null ? (
+                          `$${Number(monto).toFixed(2)}`
                         ) : (
-                          <span style={{ color: '#6b7280' }}>Sin precio</span>
+                          <span style={{ color: '#6b7280' }}>Sin monto</span>
                         )}
                       </td>
 
-                      {/* 👉 En la vista Eliminados NO renderizamos la celda de acciones */}
                       {filtro !== 'eliminados' && (
                         <td className="acciones-tramites">
                           <button
