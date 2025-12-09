@@ -251,6 +251,11 @@
   border: 1px solid rgba(248, 113, 113, 0.3);
   color: #fecaca;
 }
+.badge-estado--eliminada {
+  background-color: #991b1b;
+  color: #fee2e2;
+}
+
 
 /* ========= Responsive ========= */
 

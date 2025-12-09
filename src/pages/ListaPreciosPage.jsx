@@ -20,20 +20,17 @@ const getAuthHeaders = () => {
 // Helpers de fechas
 // =======================
 
-// 👇 ARREGLADO: ignoramos timezone y tomamos solo Y-M-D
+// Ignoramos timezone y tomamos solo Y-M-D
 function parseDate(value) {
   if (!value) return null;
 
-  // Si ya es Date, la devolvemos
   if (value instanceof Date) return value;
 
   if (typeof value === "string") {
-    // value puede ser "2025-12-04" o "2025-12-04T00:00:00.000Z"
     const datePart = value.split("T")[0]; // "2025-12-04"
     const [y, m, d] = datePart.split("-").map(Number);
     if (!y || !m || !d) return null;
-    // new Date(año, mesIndex, día) NO aplica offset de zona horaria
-    return new Date(y, m - 1, d);
+    return new Date(y, m - 1, d); // new Date(año, mesIndex, día)
   }
 
   return null;
@@ -45,7 +42,7 @@ function formatDateForInput(value) {
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`; // YYYY-MM-DD (para <input type="date">)
+  return `${year}-${month}-${day}`; // YYYY-MM-DD (para <input type="date">
 }
 
 function formatDateForTable(value) {
@@ -57,17 +54,19 @@ function formatDateForTable(value) {
   return `${day}/${month}/${year}`; // dd/mm/aaaa
 }
 
-// Orden de estados: futuras arriba, activas en el medio, vencidas abajo
+// Orden de estados: futuras, activas, vencidas, eliminadas
 const ESTADO_ORDER = {
   futura: 0,
   activa: 1,
   vencida: 2,
+  eliminada: 3,
 };
 
 function getEstadoLabel(estado) {
   if (estado === "futura") return "FUTURA";
   if (estado === "vencida") return "VENCIDA";
-  return "VIGENTE";
+  if (estado === "eliminada") return "ELIMINADA";
+  return "VIGENTE"; // "activa"
 }
 
 // =======================
@@ -110,13 +109,16 @@ export default function ListaPreciosPage() {
 
       setListas(data);
 
-      // Seleccionamos la activa si existe, si no la primera
+      // Seleccionamos la activa; si no hay, la primera NO eliminada
       const activa = data.find((lp) => lp.estado === "activa");
-      const inicial = activa || data[0] || null;
+      const primeraNoEliminada = data.find((lp) => lp.estado !== "eliminada");
+      const inicial = activa || primeraNoEliminada || null;
       setSelectedLista(inicial);
 
       if (inicial) {
         await fetchDetalles(inicial.id);
+      } else {
+        setPreciosPorTipo({});
       }
     } catch (e) {
       console.error(e);
@@ -167,6 +169,8 @@ export default function ListaPreciosPage() {
   // Seleccionar lista
   // ----------------------
   const handleSelectLista = (lista) => {
+    // Ahora SÍ permitimos seleccionar vencidas y eliminadas,
+    // para ver fechas y precios, pero en modo solo lectura.
     setSelectedLista(lista);
     fetchDetalles(lista.id);
   };
@@ -184,7 +188,7 @@ export default function ListaPreciosPage() {
 
     const body = {
       lista_precio: {
-        fecha_hora_desde_lista_precio: formNueva.fecha_desde || null, // Rails castea "YYYY-MM-DD"
+        fecha_hora_desde_lista_precio: formNueva.fecha_desde || null,
         fecha_hora_hasta_lista_precio: formNueva.fecha_hasta || null,
       },
     };
@@ -232,6 +236,15 @@ export default function ListaPreciosPage() {
 
   const handleGuardarEdicion = async () => {
     if (!selectedLista) return;
+
+    const estado = selectedLista.estado;
+
+    // 🔒 No permitir editar listas vencidas ni eliminadas
+    if (estado === "vencida" || estado === "eliminada") {
+      setError("No se puede editar una lista de precios vencida o eliminada.");
+      return;
+    }
+
     setError(null);
 
     const body = {
@@ -311,6 +324,15 @@ export default function ListaPreciosPage() {
 
   const handleGuardarPrecioTipo = async (tipoId) => {
     if (!selectedLista) return;
+
+    const estado = selectedLista.estado;
+
+    // 🔒 No permitir asignar precios si la lista está vencida o eliminada
+    if (estado === "vencida" || estado === "eliminada") {
+      setError("No se pueden modificar precios de una lista vencida o eliminada.");
+      return;
+    }
+
     const precio = preciosPorTipo[tipoId];
     if (precio === undefined || precio === null || precio === "") return;
 
@@ -356,6 +378,10 @@ export default function ListaPreciosPage() {
     const cb = parseInt(b.cod_lista_precio, 10) || 0;
     return ca - cb;
   });
+
+  const estadoSeleccionada = selectedLista?.estado || null;
+  const isReadOnlyLista =
+    estadoSeleccionada === "vencida" || estadoSeleccionada === "eliminada";
 
   // ----------------------
   // Render
@@ -410,7 +436,9 @@ export default function ListaPreciosPage() {
                         </span>
                       </td>
                       <td>
-                        {estado === "vencida" ? (
+                        {estado === "eliminada" ? (
+                          <span className="acciones-disabled">Eliminada</span>
+                        ) : estado === "vencida" ? (
                           <span className="acciones-disabled">Histórico</span>
                         ) : (
                           <button
@@ -489,7 +517,7 @@ export default function ListaPreciosPage() {
           </div>
 
           {/* EDITAR LISTA SELECCIONADA */}
-          {selectedLista && (
+          {selectedLista && !isReadOnlyLista && (
             <div className="panel-subsection">
               <div className="panel-title">Editar Lista de Precios</div>
 
@@ -553,55 +581,96 @@ export default function ListaPreciosPage() {
           <div className="panel-subsection">
             <div className="panel-title">Precios por Tipo de Trámite</div>
             {selectedLista ? (
-              <>
-                <p className="panel-caption">
-                  Seleccioná una lista de precios en el panel izquierdo para poder asignar
-                  precios a cada tipo de trámite.
-                </p>
-                {loadingDetalle ? (
-                  <div className="panel-loading">Cargando precios…</div>
-                ) : (
-                  <table className="tabla-precios-tipo">
-                    <thead>
-                      <tr>
-                        <th>Tipo de Trámite</th>
-                        <th>Precio en esta lista</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tiposTramite.map((tipo) => (
-                        <tr key={tipo.id}>
-                          <td>{tipo.nombre}</td>
-                          <td>
-                            <input
-                              type="number"
-                              className="input-precio"
-                              value={
-                                preciosPorTipo[tipo.id] !== undefined
-                                  ? preciosPorTipo[tipo.id]
-                                  : ""
-                              }
-                              onChange={(e) =>
-                                handleChangePrecioTipo(tipo.id, e.target.value)
-                              }
-                            />
-                          </td>
-                          <td>
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-primary"
-                              onClick={() => handleGuardarPrecioTipo(tipo.id)}
-                            >
-                              Guardar
-                            </button>
-                          </td>
+              isReadOnlyLista ? (
+                <>
+                  <p className="panel-caption">
+                    Esta lista está{" "}
+                    {estadoSeleccionada === "vencida" ? "vencida" : "eliminada"}. Sólo
+                    podés consultar sus precios; no se pueden modificar.
+                  </p>
+                  {loadingDetalle ? (
+                    <div className="panel-loading">Cargando precios…</div>
+                  ) : (
+                    <table className="tabla-precios-tipo">
+                      <thead>
+                        <tr>
+                          <th>Tipo de Trámite</th>
+                          <th>Precio en esta lista</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </>
+                      </thead>
+                      <tbody>
+                        {tiposTramite.map((tipo) => (
+                          <tr key={tipo.id}>
+                            <td>{tipo.nombre}</td>
+                            <td>
+                              <input
+                                type="number"
+                                className="input-precio"
+                                value={
+                                  preciosPorTipo[tipo.id] !== undefined
+                                    ? preciosPorTipo[tipo.id]
+                                    : ""
+                                }
+                                disabled
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="panel-caption">
+                    Seleccioná una lista de precios en el panel izquierdo para poder asignar
+                    precios a cada tipo de trámite.
+                  </p>
+                  {loadingDetalle ? (
+                    <div className="panel-loading">Cargando precios…</div>
+                  ) : (
+                    <table className="tabla-precios-tipo">
+                      <thead>
+                        <tr>
+                          <th>Tipo de Trámite</th>
+                          <th>Precio en esta lista</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tiposTramite.map((tipo) => (
+                          <tr key={tipo.id}>
+                            <td>{tipo.nombre}</td>
+                            <td>
+                              <input
+                                type="number"
+                                className="input-precio"
+                                value={
+                                  preciosPorTipo[tipo.id] !== undefined
+                                    ? preciosPorTipo[tipo.id]
+                                    : ""
+                                }
+                                onChange={(e) =>
+                                  handleChangePrecioTipo(tipo.id, e.target.value)
+                                }
+                              />
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-primary"
+                                onClick={() => handleGuardarPrecioTipo(tipo.id)}
+                              >
+                                Guardar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </>
+              )
             ) : (
               <p>Seleccioná una lista de precios en el panel izquierdo.</p>
             )}
