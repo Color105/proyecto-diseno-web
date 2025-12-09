@@ -6,7 +6,6 @@ import {
   createTipo,
   updateTipo,
   deleteTipo,
-  asignarPrecioTipoTramite,
 } from '../services/adminApi';
 import '../components/TramiteDashboard.css';
 
@@ -16,19 +15,12 @@ export default function ABMTipos() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     nombre: '',
-    plazo_documentacion: ''
+    plazo_documentacion: '',
   });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-
-  // Estado para modal de precio
-  const [showPrecioModal, setShowPrecioModal] = useState(false);
-  const [tipoPrecioSeleccionado, setTipoPrecioSeleccionado] = useState(null);
-  const [precioValor, setPrecioValor] = useState('');
-  const [precioError, setPrecioError] = useState(null);
-  const [precioLoading, setPrecioLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -121,55 +113,6 @@ export default function ABMTipos() {
     navigate(`/admin/tipos/${tipoId}/versiones`);
   };
 
-  // ========= MODAL PRECIO =========
-
-  const abrirModalPrecio = (tipo) => {
-    setTipoPrecioSeleccionado(tipo);
-    setPrecioValor(tipo.precio_actual ?? '');
-    setPrecioError(null);
-    setShowPrecioModal(true);
-  };
-
-  const cerrarModalPrecio = () => {
-    setShowPrecioModal(false);
-    setTipoPrecioSeleccionado(null);
-    setPrecioValor('');
-    setPrecioError(null);
-  };
-
-  const handleSubmitPrecio = async (e) => {
-    e.preventDefault();
-    if (!tipoPrecioSeleccionado) return;
-
-    setPrecioError(null);
-
-    const valor = parseFloat(String(precioValor).replace(',', '.'));
-    if (isNaN(valor) || valor < 0) {
-      setPrecioError('Ingrese un precio válido (número mayor o igual a 0).');
-      return;
-    }
-
-    try {
-      setPrecioLoading(true);
-      await asignarPrecioTipoTramite(tipoPrecioSeleccionado.id, valor);
-
-      setTipos((prev) =>
-        prev.map((t) =>
-          t.id === tipoPrecioSeleccionado.id
-            ? { ...t, precio_actual: valor }
-            : t
-        )
-      );
-
-      cerrarModalPrecio();
-    } catch (err) {
-      console.error('Error al asignar precio:', err);
-      setPrecioError('Error al asignar precio: ' + err.message);
-    } finally {
-      setPrecioLoading(false);
-    }
-  };
-
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
@@ -218,7 +161,7 @@ export default function ABMTipos() {
                       plazo_documentacion: e.target.value,
                     })
                   }
-                  required={!editingTipo}  // solo requerido en alta
+                  required={!editingTipo} // solo requerido en alta
                   min="0"
                   disabled={!!editingTipo} // deshabilitado en edición
                   readOnly={!!editingTipo}
@@ -284,60 +227,6 @@ export default function ABMTipos() {
         </div>
       )}
 
-      {/* Modal precio */}
-      {showPrecioModal && tipoPrecioSeleccionado && (
-        <div className="modal-backdrop" onMouseDown={cerrarModalPrecio}>
-          <div
-            className="modal-content"
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <h3>Asignar precio</h3>
-            <p style={{ marginBottom: '10px' }}>
-              Tipo: <strong>{tipoPrecioSeleccionado.nombre}</strong>
-            </p>
-            <form onSubmit={handleSubmitPrecio} className="tramite-form">
-              <label>
-                Precio (AR$):
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={precioValor}
-                  onChange={(e) => setPrecioValor(e.target.value)}
-                  required
-                />
-              </label>
-
-              {precioError && (
-                <div
-                  className="error-message"
-                  style={{ marginBottom: '10px' }}
-                >
-                  {precioError}
-                </div>
-              )}
-
-              <div className="form-actions">
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={precioLoading}
-                >
-                  {precioLoading ? 'Guardando...' : 'Guardar'}
-                </button>
-                <button
-                  type="button"
-                  onClick={cerrarModalPrecio}
-                  className="btn-secondary"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       <div className="table-wrapper">
         <table className="tramites-table">
           <thead>
@@ -379,16 +268,6 @@ export default function ABMTipos() {
                     >
                       Eliminar
                     </button>
-
-                    <button
-                      onClick={() => abrirModalPrecio(tipo)}
-                      className="btn-secondary"
-                      style={{ marginRight: '10px' }}
-                      title="Asignar / modificar precio"
-                    >
-                      Precio 💲
-                    </button>
-
                     <button
                       onClick={() => handleGestionarVersiones(tipo.id)}
                       className="btn-secondary"
